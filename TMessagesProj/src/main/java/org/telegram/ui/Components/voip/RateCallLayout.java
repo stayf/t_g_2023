@@ -16,8 +16,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 
-import com.google.android.exoplayer2.util.Log;
-
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
@@ -170,7 +168,6 @@ public class RateCallLayout extends FrameLayout {
 
         @Override
         public boolean dispatchTouchEvent(MotionEvent event) {
-            Log.e("ddd", "ddd=" + event.getAction());
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if (allStarsProvider != null) {
