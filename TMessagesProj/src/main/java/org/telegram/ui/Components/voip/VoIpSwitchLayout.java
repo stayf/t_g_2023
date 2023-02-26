@@ -27,6 +27,7 @@ public class VoIpSwitchLayout extends FrameLayout {
     public enum Type {
         MICRO,
         CAMERA,
+        VIDEO
     }
 
     private final VoIpButtonView voIpButtonView;
@@ -46,26 +47,38 @@ public class VoIpSwitchLayout extends FrameLayout {
                 voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
                 voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
                 break;
+            case VIDEO:
+                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
+                voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
+                break;
             case CAMERA:
-                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
                 break;
         }
     }
 
     public static class VoIpButtonView extends View {
         private static final float DARK_LIGHT_PERCENT = 0.15f;
+        private static final int DARK_LIGHT_DEFAULT_ALPHA = (int) (255 * DARK_LIGHT_PERCENT);
         private static final int ITEM_SIZE = 52;
 
         private RLottieDrawable unSelectedIcon;
         private RLottieDrawable selectedIcon;
+        private RLottieDrawable singleIcon;
         private final Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint whiteCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint whiteCircleAlphaPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint darkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path clipPath = new Path();
         private final int maxRadius = AndroidUtilities.dp(ITEM_SIZE / 2f);
         private int unselectedRadius = maxRadius;
         private int selectedRadius = 0;
         private boolean isSelectedState = false;
+        private int singleIconBackgroundAlphaPercent = 0;
 
         public VoIpButtonView(@NonNull Context context) {
             super(context);
@@ -73,16 +86,34 @@ public class VoIpSwitchLayout extends FrameLayout {
 
             whiteCirclePaint.setColor(Color.WHITE);
             whiteCircleAlphaPaint.setColor(Color.WHITE);
-            whiteCircleAlphaPaint.setAlpha((int) (255 * DARK_LIGHT_PERCENT));
+            whiteCircleAlphaPaint.setAlpha(DARK_LIGHT_DEFAULT_ALPHA);
 
             maskPaint.setColor(Color.BLACK);
             maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+
+            darkPaint.setColor(Color.BLACK);
+            darkPaint.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP));
+            darkPaint.setAlpha(DARK_LIGHT_DEFAULT_ALPHA);
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
             float cx = getWidth() / 2f;
             float cy = getHeight() / 2f;
+
+            if (singleIcon != null) {
+                if (isSelectedState) {
+                    darkPaint.setAlpha((int) (DARK_LIGHT_DEFAULT_ALPHA * singleIconBackgroundAlphaPercent / 100f));
+                    whiteCirclePaint.setAlpha((int) (255 * singleIconBackgroundAlphaPercent / 100f));
+                    canvas.drawCircle(cx, cy, maxRadius, whiteCirclePaint);
+                    singleIcon.draw(canvas, maskPaint);
+                    singleIcon.draw(canvas, darkPaint); //затемнение иконки
+                } else {
+                    canvas.drawCircle(cx, cy, unselectedRadius, whiteCircleAlphaPaint); //добавляем светлый фон
+                    singleIcon.draw(canvas);
+                }
+                return;
+            }
 
             if (isSelectedState && unselectedRadius > 0 && unselectedRadius != maxRadius) {
                 //в процессе смены с выбранно на НЕ выбранно.
@@ -120,6 +151,46 @@ public class VoIpSwitchLayout extends FrameLayout {
         }
 
         private void switchSelectedState() {
+            if (singleIcon != null) {
+                if (singleIconBackgroundAlphaPercent != 100 && singleIconBackgroundAlphaPercent != 0)
+                    return;
+                if (isSelectedState) {
+                    ValueAnimator animator = ValueAnimator.ofInt(100, 20);
+                    animator.addUpdateListener(animation -> {
+                        singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
+                        invalidate();
+                    });
+                    animator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            isSelectedState = false;
+                            singleIconBackgroundAlphaPercent = 0;
+                            invalidate();
+                        }
+                    });
+                    animator.setDuration(200);
+                    animator.start();
+                } else {
+                    isSelectedState = true;
+                    ValueAnimator animator = ValueAnimator.ofInt(20, 100);
+                    animator.addUpdateListener(animation -> {
+                        singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
+                        invalidate();
+                    });
+                    animator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            singleIconBackgroundAlphaPercent = 100;
+                            invalidate();
+                        }
+                    });
+                    animator.setDuration(200);
+                    animator.start();
+                }
+                singleIcon.setCurrentFrame(0, false);
+                singleIcon.start();
+                return;
+            }
             boolean isUnSelected = unselectedRadius == maxRadius && selectedRadius == 0;
             boolean isSelected = selectedRadius == maxRadius && unselectedRadius == 0;
             if (isUnSelected) {
