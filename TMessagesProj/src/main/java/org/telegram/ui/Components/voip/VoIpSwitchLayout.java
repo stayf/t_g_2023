@@ -27,10 +27,13 @@ public class VoIpSwitchLayout extends FrameLayout {
     public enum Type {
         MICRO,
         CAMERA,
-        VIDEO
+        VIDEO,
+        BLUETOOTH,
+        SPEAKER,
     }
 
     private final VoIpButtonView voIpButtonView;
+    private Type type;
 
     public VoIpSwitchLayout(@NonNull Context context) {
         super(context);
@@ -40,25 +43,57 @@ public class VoIpSwitchLayout extends FrameLayout {
     }
 
     public void setType(Type type) {
+        int size = AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE);
         switch (type) {
             case MICRO:
-                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
-                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
+                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
                 voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
                 voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
                 break;
             case VIDEO:
-                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
-                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
+                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
                 voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
                 voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
                 break;
             case CAMERA:
-                voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
-                voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE), true, null);
+                if (voIpButtonView.singleIcon != null) {
+                    voIpButtonView.singleIcon.recycle(false);
+                }
+                voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, size, size, true, null);
                 voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
                 break;
+            case SPEAKER:
+                if (this.type == Type.BLUETOOTH) {
+                    voIpButtonView.singleIcon.setOnAnimationEndListener(() -> {
+                        AndroidUtilities.runOnUIThread(() -> {
+                            voIpButtonView.singleIcon = new RLottieDrawable(R.raw.speaker_to_bt, "" + R.raw.speaker_to_bt, size, size, true, null);
+                            voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
+                        });
+                    });
+                    voIpButtonView.singleIcon.start();
+                } else {
+                    voIpButtonView.singleIcon = new RLottieDrawable(R.raw.speaker_to_bt, "" + R.raw.speaker_to_bt, size, size, true, null);
+                    voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
+                }
+                break;
+            case BLUETOOTH:
+                if (this.type == Type.SPEAKER) {
+                    voIpButtonView.singleIcon.setOnAnimationEndListener(() -> {
+                        AndroidUtilities.runOnUIThread(() -> {
+                            voIpButtonView.singleIcon = new RLottieDrawable(R.raw.bt_to_speaker, "" + R.raw.bt_to_speaker, size, size, true, null);
+                            voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
+                        });
+                    });
+                    voIpButtonView.singleIcon.start();
+                } else {
+                    voIpButtonView.singleIcon = new RLottieDrawable(R.raw.bt_to_speaker, "" + R.raw.bt_to_speaker, size, size, true, null);
+                    voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
+                }
+                break;
         }
+        this.type = type;
     }
 
     public static class VoIpButtonView extends View {
