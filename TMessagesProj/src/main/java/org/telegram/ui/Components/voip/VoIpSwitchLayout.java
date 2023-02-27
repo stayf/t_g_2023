@@ -35,16 +35,20 @@ public class VoIpSwitchLayout extends FrameLayout {
         SPEAKER,
     }
 
-    private final VoIpButtonView voIpButtonView;
+    private VoIpButtonView voIpButtonView;
     private Type type;
     private final TextView currentTextView;
     private final TextView newTextView;
+    public int animationDelay;
+
+    public void setOnBtnClickedListener(VoIpButtonView.OnBtnClickedListener onBtnClickedListener) {
+        voIpButtonView.setOnBtnClickedListener(onBtnClickedListener);
+    }
 
     public VoIpSwitchLayout(@NonNull Context context) {
         super(context);
         setWillNotDraw(true);
         voIpButtonView = new VoIpButtonView(context);
-        voIpButtonView.setBeforeStateChange(isSelected -> setText(type, isSelected));
         addView(voIpButtonView, LayoutHelper.createFrame(VoIpButtonView.ITEM_SIZE, VoIpButtonView.ITEM_SIZE, Gravity.CENTER_HORIZONTAL));
 
         currentTextView = new TextView(context);
@@ -97,10 +101,11 @@ public class VoIpSwitchLayout extends FrameLayout {
         if (currentTextView.getVisibility() == GONE && newTextView.getVisibility() == GONE) {
             currentTextView.setVisibility(VISIBLE);
             currentTextView.setText(newText);
+            newTextView.setText(newText);
             return;
         }
 
-        if (currentTextView.getText().equals(newText)) {
+        if (newTextView.getText().equals(newText) && currentTextView.getText().equals(newText)) {
             return;
         }
 
@@ -124,27 +129,58 @@ public class VoIpSwitchLayout extends FrameLayout {
         }).start();
     }
 
-    public void setType(Type type) {
+    private void attachNewButton(int rawRes, int size, boolean isSelected, Type type) {
+        final VoIpButtonView newVoIpButtonView = new VoIpButtonView(getContext());
+        newVoIpButtonView.singleIcon = new RLottieDrawable(rawRes, "" + rawRes, size, size, true, null);
+        newVoIpButtonView.singleIcon.setMasterParent(newVoIpButtonView);
+        newVoIpButtonView.setSelectedState(isSelected, false, type);
+        newVoIpButtonView.setAlpha(0f);
+        newVoIpButtonView.setOnBtnClickedListener(voIpButtonView.onBtnClickedListener);
+        addView(newVoIpButtonView, LayoutHelper.createFrame(VoIpButtonView.ITEM_SIZE, VoIpButtonView.ITEM_SIZE, Gravity.CENTER_HORIZONTAL));
+        final VoIpButtonView oldVoIpButton = voIpButtonView;
+        voIpButtonView = newVoIpButtonView;
+        removeView(oldVoIpButton);
+        newVoIpButtonView.animate().alpha(1f).setDuration(250).start();
+        oldVoIpButton.animate().alpha(0f).setDuration(250).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                removeView(oldVoIpButton);
+            }
+        }).start();
+    }
+
+    public void setType(Type type, boolean isSelected) {
+        if (this.type == type && isSelected == voIpButtonView.isSelectedState) {
+            return;
+        }
         int size = AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE);
+        boolean ignoreSetState = false;
         switch (type) {
             case MICRO:
-                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
-                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
-                voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
-                voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
+                if (this.type != Type.MICRO) {
+                    voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
+                    voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
+                    voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
+                    voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
+                }
                 break;
             case VIDEO:
-                voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
-                voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
-                voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
-                voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
+                //R.drawable.calls_sharescreen скринкаст в дизайне не используется
+                if (this.type != Type.VIDEO) {
+                    voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
+                    voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
+                    voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
+                    voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
+                }
                 break;
             case CAMERA:
-                if (voIpButtonView.singleIcon != null) {
-                    voIpButtonView.singleIcon.recycle(false);
+                if (this.type == Type.SPEAKER || this.type == Type.BLUETOOTH) {
+                    ignoreSetState = true;
+                    attachNewButton(R.raw.camera_flip2, size, isSelected, type);
+                } else if (this.type != Type.CAMERA) {
+                    voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, size, size, true, null);
+                    voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
                 }
-                voIpButtonView.singleIcon = new RLottieDrawable(R.raw.camera_flip2, "" + R.raw.camera_flip2, size, size, true, null);
-                voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
                 break;
             case SPEAKER:
                 if (this.type == Type.BLUETOOTH) {
@@ -155,7 +191,10 @@ public class VoIpSwitchLayout extends FrameLayout {
                         });
                     });
                     voIpButtonView.singleIcon.start();
-                } else {
+                } else if (this.type == Type.CAMERA) {
+                    ignoreSetState = true;
+                    attachNewButton(R.raw.speaker_to_bt, size, isSelected, type);
+                } else if (this.type != Type.SPEAKER) {
                     voIpButtonView.singleIcon = new RLottieDrawable(R.raw.speaker_to_bt, "" + R.raw.speaker_to_bt, size, size, true, null);
                     voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
                 }
@@ -169,13 +208,18 @@ public class VoIpSwitchLayout extends FrameLayout {
                         });
                     });
                     voIpButtonView.singleIcon.start();
-                } else {
+                } else if (this.type == Type.CAMERA) {
+                    ignoreSetState = true;
+                    attachNewButton(R.raw.bt_to_speaker, size, isSelected, type);
+                } else if (this.type != Type.BLUETOOTH) {
                     voIpButtonView.singleIcon = new RLottieDrawable(R.raw.bt_to_speaker, "" + R.raw.bt_to_speaker, size, size, true, null);
                     voIpButtonView.singleIcon.setMasterParent(voIpButtonView);
                 }
                 break;
         }
-        setText(type, voIpButtonView.isSelectedState);
+
+        if (!ignoreSetState) voIpButtonView.setSelectedState(isSelected, this.type != null, type);
+        setText(type, isSelected);
         this.type = type;
     }
 
@@ -197,14 +241,85 @@ public class VoIpSwitchLayout extends FrameLayout {
         private int selectedRadius = 0;
         private boolean isSelectedState = false;
         private int singleIconBackgroundAlphaPercent = 0;
-        private BeforeStateChange beforeStateChange;
+        private OnBtnClickedListener onBtnClickedListener;
 
-        interface BeforeStateChange {
-            void beforeStateChange(boolean isSelected);
+        public void setSelectedState(boolean selectedState, boolean animate, Type type) {
+            if (animate) {
+                if (singleIcon != null) {
+                    ValueAnimator animator = selectedState ? ValueAnimator.ofInt(20, 100) : ValueAnimator.ofInt(100, 20);
+                    animator.addUpdateListener(animation -> {
+                        singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
+                        invalidate();
+                    });
+                    animator.setDuration(200);
+                    animator.start();
+                    if (type == Type.CAMERA) {
+                        singleIcon.setCurrentFrame(0, false);
+                        singleIcon.start();
+                    }
+                } else {
+                    if (isAnimating()) {
+                        //тут по идее нужно сделать пул последовательных анимаций
+                        AndroidUtilities.runOnUIThread(() -> setSelectedState(selectedState, true, type), 200);
+                    } else {
+                        ValueAnimator animator = ValueAnimator.ofInt(0, maxRadius);
+                        if (selectedState) {
+                            animator.addUpdateListener(animation -> {
+                                selectedRadius = (int) animation.getAnimatedValue();
+                                invalidate();
+                            });
+                            animator.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    unselectedRadius = 0; //перешли в состояние выбранно
+                                    invalidate();
+                                }
+                            });
+                            animator.setDuration(200);
+                            animator.start();
+                            selectedIcon.setCurrentFrame(0, false);
+                            selectedIcon.start();
+                        } else {
+                            animator.addUpdateListener(animation -> {
+                                unselectedRadius = (int) animation.getAnimatedValue();
+                                invalidate();
+                            });
+                            animator.setDuration(200);
+                            animator.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    selectedRadius = 0; //перешли в состояние НЕ выбранно
+                                    invalidate();
+                                }
+                            });
+                            animator.start();
+                        }
+                    }
+                }
+            } else {
+                if (selectedState) {
+                    selectedRadius = maxRadius;
+                    unselectedRadius = 0;
+                    singleIconBackgroundAlphaPercent = 100;
+                    if (singleIcon == null) {
+                        selectedIcon.setCurrentFrame(selectedIcon.getFramesCount() - 1, false);
+                    }
+                } else {
+                    selectedRadius = 0;
+                    unselectedRadius = maxRadius;
+                    singleIconBackgroundAlphaPercent = 20;
+                }
+            }
+            isSelectedState = selectedState;
+            invalidate();
         }
 
-        public void setBeforeStateChange(BeforeStateChange beforeStateChange) {
-            this.beforeStateChange = beforeStateChange;
+        public interface OnBtnClickedListener {
+            void onClicked(View view);
+        }
+
+        public void setOnBtnClickedListener(OnBtnClickedListener onBtnClickedListener) {
+            this.onBtnClickedListener = onBtnClickedListener;
         }
 
         public VoIpButtonView(@NonNull Context context) {
@@ -229,20 +344,23 @@ public class VoIpSwitchLayout extends FrameLayout {
             float cy = getHeight() / 2f;
 
             if (singleIcon != null) {
-                if (isSelectedState) {
+                if (singleIconBackgroundAlphaPercent > 20) {
                     darkPaint.setAlpha((int) (DARK_LIGHT_DEFAULT_ALPHA * singleIconBackgroundAlphaPercent / 100f));
                     whiteCirclePaint.setAlpha((int) (255 * singleIconBackgroundAlphaPercent / 100f));
                     canvas.drawCircle(cx, cy, maxRadius, whiteCirclePaint);
                     singleIcon.draw(canvas, maskPaint);
                     singleIcon.draw(canvas, darkPaint); //затемнение иконки
                 } else {
-                    canvas.drawCircle(cx, cy, unselectedRadius, whiteCircleAlphaPaint); //добавляем светлый фон
+                    canvas.drawCircle(cx, cy, maxRadius, whiteCircleAlphaPaint); //добавляем светлый фон
                     singleIcon.draw(canvas);
                 }
                 return;
             }
 
-            if (isSelectedState && unselectedRadius > 0 && unselectedRadius != maxRadius) {
+            boolean isUnSelected = unselectedRadius == maxRadius && selectedRadius == 0;
+            boolean isSelected = selectedRadius == maxRadius && unselectedRadius == 0;
+
+            if (selectedRadius == maxRadius && unselectedRadius > 0 && unselectedRadius != maxRadius) {
                 //в процессе смены с выбранно на НЕ выбранно.
                 canvas.drawCircle(cx, cy, selectedRadius, whiteCirclePaint);
                 canvas.drawCircle(cx, cy, unselectedRadius, maskPaint);
@@ -258,13 +376,13 @@ public class VoIpSwitchLayout extends FrameLayout {
                 canvas.drawCircle(cx, cy, unselectedRadius, maskPaint); //убираем весь задний фон
             }
 
-            if (!isSelectedState || unselectedRadius > 0) {
+            if (isUnSelected || unselectedRadius > 0) {
                 //не выбранно или в процессе смены с выбранно на НЕ выбранно
                 canvas.drawCircle(cx, cy, unselectedRadius, whiteCircleAlphaPaint); //добавляем светлый фон
                 unSelectedIcon.draw(canvas);
             }
 
-            if ((isSelectedState && unselectedRadius == 0) || (!isSelectedState && selectedRadius > 0 && unselectedRadius == maxRadius)) {
+            if (isSelected || (selectedRadius > 0 && unselectedRadius == maxRadius)) {
                 //выбранно и не в процессе смены или в процессе смены с НЕ выбранно на выбранно.
                 clipPath.reset();
                 clipPath.addCircle(cx, cy, selectedRadius, Path.Direction.CW);
@@ -277,89 +395,10 @@ public class VoIpSwitchLayout extends FrameLayout {
             }
         }
 
-        private void switchSelectedState() {
-            if (singleIcon != null) {
-                if (singleIconBackgroundAlphaPercent != 100 && singleIconBackgroundAlphaPercent != 0)
-                    return;
-                if (isSelectedState) {
-                    if (beforeStateChange != null) beforeStateChange.beforeStateChange(true);
-                    ValueAnimator animator = ValueAnimator.ofInt(100, 20);
-                    animator.addUpdateListener(animation -> {
-                        singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
-                        invalidate();
-                    });
-                    animator.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            isSelectedState = false;
-                            singleIconBackgroundAlphaPercent = 0;
-                            invalidate();
-                        }
-                    });
-                    animator.setDuration(200);
-                    animator.start();
-                } else {
-                    if (beforeStateChange != null) beforeStateChange.beforeStateChange(false);
-                    isSelectedState = true;
-                    ValueAnimator animator = ValueAnimator.ofInt(20, 100);
-                    animator.addUpdateListener(animation -> {
-                        singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
-                        invalidate();
-                    });
-                    animator.addListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            singleIconBackgroundAlphaPercent = 100;
-                            invalidate();
-                        }
-                    });
-                    animator.setDuration(200);
-                    animator.start();
-                }
-                singleIcon.setCurrentFrame(0, false);
-                singleIcon.start();
-                return;
-            }
+        private boolean isAnimating() {
             boolean isUnSelected = unselectedRadius == maxRadius && selectedRadius == 0;
             boolean isSelected = selectedRadius == maxRadius && unselectedRadius == 0;
-            if (isUnSelected) {
-                if (beforeStateChange != null) beforeStateChange.beforeStateChange(true);
-                ValueAnimator animator = ValueAnimator.ofInt(0, maxRadius);
-                animator.addUpdateListener(animation -> {
-                    selectedRadius = (int) animation.getAnimatedValue();
-                    invalidate();
-                });
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        isSelectedState = true;
-                        unselectedRadius = 0;
-                        invalidate();
-                    }
-                });
-                animator.setDuration(200);
-                animator.start();
-                selectedIcon.setCurrentFrame(0, false);
-                selectedIcon.start();
-            }
-            if (isSelected) {
-                if (beforeStateChange != null) beforeStateChange.beforeStateChange(false);
-                ValueAnimator animator = ValueAnimator.ofInt(0, maxRadius);
-                animator.addUpdateListener(animation -> {
-                    unselectedRadius = (int) animation.getAnimatedValue();
-                    invalidate();
-                });
-                animator.setDuration(200);
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        isSelectedState = false;
-                        selectedRadius = 0;
-                        invalidate();
-                    }
-                });
-                animator.start();
-            }
+            return !isUnSelected && !isSelected;
         }
 
         @SuppressLint("ClickableViewAccessibility")
@@ -374,7 +413,7 @@ public class VoIpSwitchLayout extends FrameLayout {
                     animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
                     animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
                     if (event.getX() < getWidth() && event.getY() < getHeight()) {
-                        switchSelectedState();
+                        if (onBtnClickedListener != null) onBtnClickedListener.onClicked(this);
                     }
                     break;
                 case MotionEvent.ACTION_CANCEL:
