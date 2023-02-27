@@ -12,9 +12,12 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -34,12 +37,91 @@ public class VoIpSwitchLayout extends FrameLayout {
 
     private final VoIpButtonView voIpButtonView;
     private Type type;
+    private final TextView currentTextView;
+    private final TextView newTextView;
 
     public VoIpSwitchLayout(@NonNull Context context) {
         super(context);
         setWillNotDraw(true);
         voIpButtonView = new VoIpButtonView(context);
-        addView(voIpButtonView, LayoutHelper.createFrame(VoIpButtonView.ITEM_SIZE, VoIpButtonView.ITEM_SIZE));
+        voIpButtonView.setBeforeStateChange(isSelected -> setText(type, isSelected));
+        addView(voIpButtonView, LayoutHelper.createFrame(VoIpButtonView.ITEM_SIZE, VoIpButtonView.ITEM_SIZE, Gravity.CENTER_HORIZONTAL));
+
+        currentTextView = new TextView(context);
+        currentTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+        currentTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
+        currentTextView.setTextColor(Color.WHITE);
+        currentTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        addView(currentTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 4, 0, 0));
+
+        newTextView = new TextView(context);
+        newTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+        newTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
+        newTextView.setTextColor(Color.WHITE);
+        newTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        addView(newTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 4, 0, 0));
+        currentTextView.setVisibility(GONE);
+        newTextView.setVisibility(GONE);
+    }
+
+    private void setText(Type type, boolean isSelectedState) {
+        final String newText;
+        switch (type) {
+            case MICRO:
+                if (isSelectedState) {
+                    newText = "Mute";
+                } else {
+                    newText = "Unmute";
+                }
+                break;
+            case CAMERA:
+                newText = "Flip";
+                break;
+            case VIDEO:
+                if (isSelectedState) {
+                    newText = "Start Video";
+                } else {
+                    newText = "Stop Video";
+                }
+                break;
+            case BLUETOOTH:
+                newText = "Bluetooth";
+                break;
+            case SPEAKER:
+                newText = "Speaker";
+                break;
+            default:
+                newText = "";
+        }
+
+        if (currentTextView.getVisibility() == GONE && newTextView.getVisibility() == GONE) {
+            currentTextView.setVisibility(VISIBLE);
+            currentTextView.setText(newText);
+            return;
+        }
+
+        if (currentTextView.getText().equals(newText)) {
+            return;
+        }
+
+        currentTextView.animate().alpha(0f).translationY(-AndroidUtilities.dp(4)).setDuration(150).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentTextView.setText(newText);
+                currentTextView.setTranslationY(0);
+                currentTextView.setAlpha(1.0f);
+            }
+        }).start();
+        newTextView.setText(newText);
+        newTextView.setVisibility(VISIBLE);
+        newTextView.setAlpha(0);
+        newTextView.setTranslationY(AndroidUtilities.dp(8));
+        newTextView.animate().alpha(1.0f).translationY(0).setDuration(150).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                newTextView.setVisibility(GONE);
+            }
+        }).start();
     }
 
     public void setType(Type type) {
@@ -93,6 +175,7 @@ public class VoIpSwitchLayout extends FrameLayout {
                 }
                 break;
         }
+        setText(type, voIpButtonView.isSelectedState);
         this.type = type;
     }
 
@@ -114,6 +197,15 @@ public class VoIpSwitchLayout extends FrameLayout {
         private int selectedRadius = 0;
         private boolean isSelectedState = false;
         private int singleIconBackgroundAlphaPercent = 0;
+        private BeforeStateChange beforeStateChange;
+
+        interface BeforeStateChange {
+            void beforeStateChange(boolean isSelected);
+        }
+
+        public void setBeforeStateChange(BeforeStateChange beforeStateChange) {
+            this.beforeStateChange = beforeStateChange;
+        }
 
         public VoIpButtonView(@NonNull Context context) {
             super(context);
@@ -190,6 +282,7 @@ public class VoIpSwitchLayout extends FrameLayout {
                 if (singleIconBackgroundAlphaPercent != 100 && singleIconBackgroundAlphaPercent != 0)
                     return;
                 if (isSelectedState) {
+                    if (beforeStateChange != null) beforeStateChange.beforeStateChange(true);
                     ValueAnimator animator = ValueAnimator.ofInt(100, 20);
                     animator.addUpdateListener(animation -> {
                         singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
@@ -206,6 +299,7 @@ public class VoIpSwitchLayout extends FrameLayout {
                     animator.setDuration(200);
                     animator.start();
                 } else {
+                    if (beforeStateChange != null) beforeStateChange.beforeStateChange(false);
                     isSelectedState = true;
                     ValueAnimator animator = ValueAnimator.ofInt(20, 100);
                     animator.addUpdateListener(animation -> {
@@ -229,6 +323,7 @@ public class VoIpSwitchLayout extends FrameLayout {
             boolean isUnSelected = unselectedRadius == maxRadius && selectedRadius == 0;
             boolean isSelected = selectedRadius == maxRadius && unselectedRadius == 0;
             if (isUnSelected) {
+                if (beforeStateChange != null) beforeStateChange.beforeStateChange(true);
                 ValueAnimator animator = ValueAnimator.ofInt(0, maxRadius);
                 animator.addUpdateListener(animation -> {
                     selectedRadius = (int) animation.getAnimatedValue();
@@ -248,6 +343,7 @@ public class VoIpSwitchLayout extends FrameLayout {
                 selectedIcon.start();
             }
             if (isSelected) {
+                if (beforeStateChange != null) beforeStateChange.beforeStateChange(false);
                 ValueAnimator animator = ValueAnimator.ofInt(0, maxRadius);
                 animator.addUpdateListener(animation -> {
                     unselectedRadius = (int) animation.getAnimatedValue();
