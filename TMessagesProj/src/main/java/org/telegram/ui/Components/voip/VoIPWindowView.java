@@ -120,7 +120,7 @@ public class VoIPWindowView extends FrameLayout {
     }
 
     public void finish() {
-        finish(150);
+        finish(400);
     }
 
     public void finish(long animDuration) {
@@ -138,7 +138,7 @@ public class VoIPWindowView extends FrameLayout {
             } else {
                 int account = UserConfig.selectedAccount;
                 animationIndex = NotificationCenter.getInstance(account).setAnimationInProgress(animationIndex, null);
-                animate().translationX(getMeasuredWidth()).setListener(new AnimatorListenerAdapter() {
+                animate().translationY(getMeasuredHeight()).alpha(0f).setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         NotificationCenter.getInstance(account).onAnimationFinish(animationIndex);
@@ -161,8 +161,9 @@ public class VoIPWindowView extends FrameLayout {
 
     public void startEnterTransition() {
         if (!lockOnScreen) {
-            setTranslationX(getMeasuredWidth());
-            animate().translationX(0).setDuration(150).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+            setTranslationY(getMeasuredHeight());
+            setAlpha(0f);
+            animate().translationY(0).alpha(1f).setDuration(400).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         }
     }
 
