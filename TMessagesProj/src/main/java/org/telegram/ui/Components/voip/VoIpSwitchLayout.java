@@ -73,9 +73,9 @@ public class VoIpSwitchLayout extends FrameLayout {
         switch (type) {
             case MICRO:
                 if (isSelectedState) {
-                    newText = "Mute";
-                } else {
                     newText = "Unmute";
+                } else {
+                    newText = "Mute";
                 }
                 break;
             case CAMERA:
@@ -152,6 +152,9 @@ public class VoIpSwitchLayout extends FrameLayout {
     public void setType(Type type, boolean isSelected) {
         if (this.type == type && isSelected == voIpButtonView.isSelectedState) {
             return;
+        }
+        if (getVisibility() != View.VISIBLE) {
+            setVisibility(View.VISIBLE);
         }
         int size = AndroidUtilities.dp(VoIpButtonView.ITEM_SIZE);
         boolean ignoreSetState = false;
@@ -242,11 +245,16 @@ public class VoIpSwitchLayout extends FrameLayout {
         private boolean isSelectedState = false;
         private int singleIconBackgroundAlphaPercent = 0;
         private OnBtnClickedListener onBtnClickedListener;
+        private ValueAnimator animator;
 
         public void setSelectedState(boolean selectedState, boolean animate, Type type) {
             if (animate) {
                 if (singleIcon != null) {
-                    ValueAnimator animator = selectedState ? ValueAnimator.ofInt(20, 100) : ValueAnimator.ofInt(100, 20);
+                    if (animator != null) {
+                        animator.removeAllUpdateListeners();
+                        animator.cancel();
+                    }
+                    animator = selectedState ? ValueAnimator.ofInt(20, 100) : ValueAnimator.ofInt(100, 20);
                     animator.addUpdateListener(animation -> {
                         singleIconBackgroundAlphaPercent = (int) animation.getAnimatedValue();
                         invalidate();
@@ -258,42 +266,43 @@ public class VoIpSwitchLayout extends FrameLayout {
                         singleIcon.start();
                     }
                 } else {
-                    if (isAnimating()) {
-                        //тут по идее нужно сделать пул последовательных анимаций
-                        AndroidUtilities.runOnUIThread(() -> setSelectedState(selectedState, true, type), 200);
+                    if (animator != null) {
+                        animator.removeAllUpdateListeners();
+                        animator.cancel();
+                    }
+                    animator = ValueAnimator.ofInt(0, maxRadius);
+                    if (selectedState) {
+                        unselectedRadius = maxRadius;
+                        animator.addUpdateListener(animation -> {
+                            selectedRadius = (int) animation.getAnimatedValue();
+                            invalidate();
+                        });
+                        animator.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                unselectedRadius = 0; //перешли в состояние выбранно
+                                invalidate();
+                            }
+                        });
+                        animator.setDuration(200);
+                        animator.start();
+                        selectedIcon.setCurrentFrame(0, false);
+                        selectedIcon.start();
                     } else {
-                        ValueAnimator animator = ValueAnimator.ofInt(0, maxRadius);
-                        if (selectedState) {
-                            animator.addUpdateListener(animation -> {
-                                selectedRadius = (int) animation.getAnimatedValue();
+                        selectedRadius = maxRadius;
+                        animator.addUpdateListener(animation -> {
+                            unselectedRadius = (int) animation.getAnimatedValue();
+                            invalidate();
+                        });
+                        animator.setDuration(200);
+                        animator.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                selectedRadius = 0; //перешли в состояние НЕ выбранно
                                 invalidate();
-                            });
-                            animator.addListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    unselectedRadius = 0; //перешли в состояние выбранно
-                                    invalidate();
-                                }
-                            });
-                            animator.setDuration(200);
-                            animator.start();
-                            selectedIcon.setCurrentFrame(0, false);
-                            selectedIcon.start();
-                        } else {
-                            animator.addUpdateListener(animation -> {
-                                unselectedRadius = (int) animation.getAnimatedValue();
-                                invalidate();
-                            });
-                            animator.setDuration(200);
-                            animator.addListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    selectedRadius = 0; //перешли в состояние НЕ выбранно
-                                    invalidate();
-                                }
-                            });
-                            animator.start();
-                        }
+                            }
+                        });
+                        animator.start();
                     }
                 }
             } else {
