@@ -157,7 +157,7 @@ public class VoIpGradientLayout extends FrameLayout {
                 invalidate();
             }
         });
-        revealAnimator.setDuration(500);
+        revealAnimator.setDuration(400);
         revealAnimator.start();
     }
 

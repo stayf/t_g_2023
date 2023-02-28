@@ -365,6 +365,7 @@ public class VoIpSwitchLayout extends FrameLayout {
                 }
                 return;
             }
+            if (selectedIcon == null || unSelectedIcon == null) return;
 
             boolean isUnSelected = unselectedRadius == maxRadius && selectedRadius == 0;
             boolean isSelected = selectedRadius == maxRadius && unselectedRadius == 0;

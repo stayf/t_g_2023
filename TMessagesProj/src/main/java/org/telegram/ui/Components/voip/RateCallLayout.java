@@ -249,7 +249,7 @@ public class RateCallLayout extends FrameLayout {
 
             addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT, 0, 24, 0, 0));
             addView(messageTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT, 0, 50, 0, 0));
-            setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.05f))));
+            setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f))));
         }
     }
 }
