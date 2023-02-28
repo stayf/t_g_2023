@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -14,6 +15,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ImageReceiver;
@@ -81,7 +84,12 @@ public class HintView extends FrameLayout {
         } else {
             textView.setMaxWidth(AndroidUtilities.dp(250));
         }
-        if (currentType == TYPE_SEARCH_AS_LIST) {
+        if (currentType == 20) {
+            textView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+            textView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.15f))));
+            textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
+            addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 30, Gravity.LEFT | Gravity.TOP, 0, topArrow ? 6 : 0, 0, topArrow ? 0 : 6));
+        } else if (currentType == TYPE_SEARCH_AS_LIST) {
             textView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
             textView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(5), getThemedColor(Theme.key_chat_gifSaveHintBackground)));
             textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
@@ -106,6 +114,9 @@ public class HintView extends FrameLayout {
         arrowImageView = new ImageView(context);
         arrowImageView.setImageResource(topArrow ? R.drawable.tooltip_arrow_up : R.drawable.tooltip_arrow);
         arrowImageView.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_gifSaveHintBackground), PorterDuff.Mode.MULTIPLY));
+        if(currentType == 20){
+            arrowImageView.setColorFilter(new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.15f)), PorterDuff.Mode.MULTIPLY));
+        }
         addView(arrowImageView, LayoutHelper.createFrame(14, 6, Gravity.LEFT | (topArrow ? Gravity.TOP : Gravity.BOTTOM), 0, 0, 0, 0));
     }
 
@@ -284,6 +295,10 @@ public class HintView extends FrameLayout {
     }
 
     public boolean showForView(View view, boolean animated) {
+        return showForView(view, animated, false);
+    }
+
+    public boolean showForView(View view, boolean animated, boolean isVoIpFragment) {
         if (currentView == view || getTag() != null) {
             if (getTag() != null) {
                 updatePosition(view);
@@ -309,6 +324,13 @@ public class HintView extends FrameLayout {
             animatorSet.playTogether(
                     ObjectAnimator.ofFloat(this, View.ALPHA, 0.0f, 1.0f)
             );
+            if (isVoIpFragment) {
+                animatorSet.playTogether(
+                        ObjectAnimator.ofFloat(this, View.SCALE_Y, 0.0f, 1.0f),
+                        ObjectAnimator.ofFloat(this, View.SCALE_X, 0.0f, 1.0f)
+                );
+                animatorSet.setInterpolator(CubicBezierInterpolator.EASE_OUT_BACK);
+            }
             animatorSet.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -357,6 +379,8 @@ public class HintView extends FrameLayout {
             }
         } else if (currentType == TYPE_SEARCH_AS_LIST) {
             centerX = position[0];
+        } else if (currentType == 20) {
+            centerX = position[0] - view.getMeasuredWidth() / 2;
         } else {
             centerX = position[0] + view.getMeasuredWidth() / 2;
         }

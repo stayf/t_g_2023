@@ -157,6 +157,7 @@ public class SharedConfig {
     public static boolean pauseMusicOnRecord = false;
     public static boolean chatBlur = true;
     public static boolean noiseSupression;
+    public static boolean callEncryptionHintDisplayed;
     public static boolean noStatusBar = true;
     public static boolean forceRtmpStream;
     public static boolean debugWebView;
@@ -523,6 +524,7 @@ public class SharedConfig {
             lockRecordAudioVideoHint = preferences.getInt("lockRecordAudioVideoHint", 0);
             disableVoiceAudioEffects = preferences.getBoolean("disableVoiceAudioEffects", false);
             noiseSupression = preferences.getBoolean("noiseSupression", false);
+            callEncryptionHintDisplayed = preferences.getBoolean("callEncryptionHintDisplayed", false);
             chatSwipeAction = preferences.getInt("ChatSwipeAction", -1);
             messageSeenHintCount = preferences.getInt("messageSeenCount", 3);
             emojiInteractionsHintCount = preferences.getInt("emojiInteractionsHintCount", 3);
@@ -1058,6 +1060,14 @@ public class SharedConfig {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("noiseSupression", noiseSupression);
+        editor.commit();
+    }
+
+    public static void toggleCallEncryptionHintDisplayed() {
+        callEncryptionHintDisplayed = !callEncryptionHintDisplayed;
+        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("callEncryptionHintDisplayed", callEncryptionHintDisplayed);
         editor.commit();
     }
 
