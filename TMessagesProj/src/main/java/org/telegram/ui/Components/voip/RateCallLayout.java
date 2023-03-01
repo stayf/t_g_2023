@@ -28,6 +28,11 @@ public class RateCallLayout extends FrameLayout {
     private final RateCallContainer rateCallContainer;
     private final FrameLayout starsContainer;
     private final StarContainer[] startsViews = new StarContainer[5];
+    private OnRateSelected onRateSelected;
+
+    public interface OnRateSelected {
+        void onRateSelected(int count);
+    }
 
     public RateCallLayout(@NonNull Context context) {
         super(context);
@@ -37,13 +42,14 @@ public class RateCallLayout extends FrameLayout {
         rateCallContainer.setVisibility(GONE);
         starsContainer.setVisibility(GONE);
 
+        int starMargin = 4;
         for (int i = 0; i < 5; i++) {
             startsViews[i] = new StarContainer(context);
             startsViews[i].setAllStarsProvider(() -> startsViews);
             startsViews[i].setOnSelectedStar((x, y, starsCount) -> {
                 if (starsCount >= 4) {
                     final RLottieImageView img = new RLottieImageView(context);
-                    final int rateAnimationSize = 100;
+                    final int rateAnimationSize = 133;
                     final int rateAnimationSizeDp = AndroidUtilities.dp(rateAnimationSize);
                     img.setAnimation(R.raw.rate, rateAnimationSize, rateAnimationSize);
                     int[] location = new int[2];
@@ -57,16 +63,18 @@ public class RateCallLayout extends FrameLayout {
                     img.setOnAnimationEndListener(() -> AndroidUtilities.runOnUIThread(() -> removeView(img)));
                     img.playAnimation();
                 }
-                //todo отправка данных
+                if(onRateSelected!=null) onRateSelected.onRateSelected(starsCount);
             }, i);
-            starsContainer.addView(startsViews[i], LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, i * (StarContainer.starSize + 2), 0, 0, 0));
+            starsContainer.addView(startsViews[i], LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, i * (StarContainer.starSize + starMargin), 0, 0, 0));
         }
 
-        addView(rateCallContainer, LayoutHelper.createFrame(300, 160, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
-        addView(starsContainer, LayoutHelper.createFrame((StarContainer.starSize + 2) * 5, 100, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 90, 0, 0));
+        addView(rateCallContainer, LayoutHelper.createFrame(300, 152, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
+        addView(starsContainer, LayoutHelper.createFrame((StarContainer.starSize * 5) + (starMargin * 4), 100, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 90, 0, 0));
     }
 
-    public void show() {
+    public void show(OnRateSelected onRateSelected) {
+        this.onRateSelected = onRateSelected;
+
         rateCallContainer.setVisibility(VISIBLE);
         starsContainer.setVisibility(VISIBLE);
 
@@ -98,7 +106,7 @@ public class RateCallLayout extends FrameLayout {
 
     public static class StarContainer extends FrameLayout {
 
-        private static final int starSize = 40;
+        private static final int starSize = 37;
 
         interface OnSelectedStar {
             void onSelected(float x, float y, int starsCount);
