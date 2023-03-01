@@ -63,13 +63,17 @@ public class RateCallLayout extends FrameLayout {
                     img.setOnAnimationEndListener(() -> AndroidUtilities.runOnUIThread(() -> removeView(img)));
                     img.playAnimation();
                 }
-                if(onRateSelected!=null) onRateSelected.onRateSelected(starsCount);
+                if (onRateSelected != null) onRateSelected.onRateSelected(starsCount);
             }, i);
             starsContainer.addView(startsViews[i], LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT, i * (StarContainer.starSize + starMargin), 0, 0, 0));
         }
 
         addView(rateCallContainer, LayoutHelper.createFrame(300, 152, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
         addView(starsContainer, LayoutHelper.createFrame((StarContainer.starSize * 5) + (starMargin * 4), 100, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 90, 0, 0));
+    }
+
+    public void updateBgDrawable(boolean isDark) {
+        rateCallContainer.updateBgDrawable(isDark);
     }
 
     public void show(OnRateSelected onRateSelected) {
@@ -237,6 +241,9 @@ public class RateCallLayout extends FrameLayout {
 
         private final TextView titleTextView;
         private final TextView messageTextView;
+        private Drawable lightBgDrawable;
+        private Drawable darkBgDrawable;
+        private boolean isDarkBg;
 
         public RateCallContainer(@NonNull Context context) {
             super(context);
@@ -253,9 +260,24 @@ public class RateCallLayout extends FrameLayout {
             messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
             messageTextView.setText("Please rate the quality of this call.");
 
+            lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+            darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+            isDarkBg = false;
+
             addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT, 0, 24, 0, 0));
             addView(messageTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT, 0, 50, 0, 0));
-            setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f))));
+            setBackground(lightBgDrawable);
+        }
+
+        public void updateBgDrawable(boolean isDark) {
+            if (isDarkBg != isDark) {
+                isDarkBg = isDark;
+                if (isDarkBg) {
+                    setBackground(darkBgDrawable);
+                } else {
+                    setBackground(lightBgDrawable);
+                }
+            }
         }
     }
 }

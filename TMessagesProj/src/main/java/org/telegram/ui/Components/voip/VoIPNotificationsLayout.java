@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.transition.ChangeBounds;
 import android.transition.Fade;
@@ -32,6 +33,7 @@ import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class VoIPNotificationsLayout extends LinearLayout {
 
@@ -42,11 +44,12 @@ public class VoIPNotificationsLayout extends LinearLayout {
     boolean lockAnimation;
     boolean wasChanged;
     Runnable onViewsUpdated;
+    private boolean isDarkBg;
 
     public VoIPNotificationsLayout(Context context) {
         super(context);
         setOrientation(VERTICAL);
-
+        isDarkBg = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             transitionSet = new TransitionSet();
             transitionSet.addTransition(new Fade(Fade.OUT).setDuration(150))
@@ -83,6 +86,16 @@ public class VoIPNotificationsLayout extends LinearLayout {
         }
     }
 
+    public void updateBgDrawable(boolean isDark) {
+        if (isDarkBg != isDark) {
+            isDarkBg = isDark;
+            for (Map.Entry<String, VoIPNotificationsLayout.NotificationView> entry : viewsByTag.entrySet()) {
+                VoIPNotificationsLayout.NotificationView view = entry.getValue();
+                view.updateBgDrawable(isDarkBg);
+            }
+        }
+    }
+
     public void addNotification(int iconRes, String text, String tag, boolean animated) {
         if (viewsByTag.get(tag) != null) {
             return;
@@ -92,6 +105,7 @@ public class VoIPNotificationsLayout extends LinearLayout {
         view.tag = tag;
         view.iconView.setImageResource(iconRes);
         view.textView.setText(text);
+        view.updateBgDrawable(isDarkBg);
         viewsByTag.put(tag, view);
 
         /*if (animated) {
@@ -199,20 +213,38 @@ public class VoIPNotificationsLayout extends LinearLayout {
         public String tag;
         ImageView iconView;
         TextView textView;
+        private Drawable lightBgDrawable;
+        private Drawable darkBgDrawable;
+        private boolean isDarkBg;
 
         public NotificationView(@NonNull Context context) {
             super(context);
             setFocusable(true);
             setFocusableInTouchMode(true);
 
+            lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+            darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+            isDarkBg = false;
+
             iconView = new ImageView(context);
-            setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.15f))));
+            setBackground(lightBgDrawable);
             addView(iconView, LayoutHelper.createFrame(24, 24, 0, 10, 4, 10, 4));
 
             textView = new TextView(context);
             textView.setTextColor(Color.WHITE);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
             addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 44, 4, 16, 4));
+        }
+
+        public void updateBgDrawable(boolean isDark) {
+            if (isDarkBg != isDark) {
+                isDarkBg = isDark;
+                if (isDarkBg) {
+                    setBackground(darkBgDrawable);
+                } else {
+                    setBackground(lightBgDrawable);
+                }
+            }
         }
 
         public void startAnimation() {

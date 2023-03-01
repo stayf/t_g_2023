@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
@@ -47,6 +48,9 @@ public class VoIPStatusTextView extends FrameLayout {
     boolean timerShowing;
 
     EllipsizeSpanAnimator ellipsizeAnimator;
+    private Drawable lightBgDrawable;
+    private Drawable darkBgDrawable;
+    private boolean isDarkBg;
 
     public VoIPStatusTextView(@NonNull Context context) {
         super(context);
@@ -59,12 +63,16 @@ public class VoIPStatusTextView extends FrameLayout {
             addView(textView[i]);
         }
 
+        lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+        darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+        isDarkBg = false;
+
         badConnectionLayer = new FrameLayout(context);
         badConnectionTextView = new TextView(context);
         badConnectionTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         badConnectionTextView.setTextColor(Color.WHITE);
         badConnectionTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-        badConnectionTextView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f))));
+        badConnectionTextView.setBackground(lightBgDrawable);
         badConnectionTextView.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(2), AndroidUtilities.dp(12), AndroidUtilities.dp(2));
         badConnectionTextView.setText("Weak network signal");
         badConnectionLayer.addView(badConnectionTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
@@ -88,7 +96,17 @@ public class VoIPStatusTextView extends FrameLayout {
 
         timerView = new VoIPTimerView(context);
         addView(timerView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+    }
 
+    public void updateBgDrawable(boolean isDark) {
+        if (isDarkBg != isDark) {
+            isDarkBg = isDark;
+            if (isDarkBg) {
+                badConnectionTextView.setBackground(darkBgDrawable);
+            } else {
+                badConnectionTextView.setBackground(lightBgDrawable);
+            }
+        }
     }
 
     public void setText(String text, boolean ellipsis, boolean animated) {

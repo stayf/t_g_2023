@@ -66,12 +66,27 @@ public class HintView extends FrameLayout {
         this(context, type, false, resourcesProvider);
     }
 
+    private final Drawable lightBgDrawable;
+    private final Drawable darkBgDrawable;
+    private final PorterDuffColorFilter lightFilter;
+    private final PorterDuffColorFilter darkFilter;
+    private boolean isDarkBg;
+
     public HintView(Context context, int type, boolean topArrow, Theme.ResourcesProvider resourcesProvider) {
         super(context);
         this.resourcesProvider = resourcesProvider;
 
         currentType = type;
         isTopArrow = topArrow;
+        if (currentType == 20) {
+            isDarkBg = false;
+        } else {
+            isDarkBg = true;
+        }
+        lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+        darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+        lightFilter = new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)), PorterDuff.Mode.MULTIPLY);
+        darkFilter = new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)), PorterDuff.Mode.MULTIPLY);
 
         textView = new CorrectlyMeasuringTextView(context);
         textView.setTextColor(getThemedColor(Theme.key_chat_gifSaveHintText));
@@ -86,7 +101,7 @@ public class HintView extends FrameLayout {
         }
         if (currentType == 20) {
             textView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-            textView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.15f))));
+            textView.setBackground(lightBgDrawable);
             textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
             addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 30, Gravity.LEFT | Gravity.TOP, 0, topArrow ? 6 : 0, 0, topArrow ? 0 : 6));
         } else if (currentType == TYPE_SEARCH_AS_LIST) {
@@ -114,10 +129,23 @@ public class HintView extends FrameLayout {
         arrowImageView = new ImageView(context);
         arrowImageView.setImageResource(topArrow ? R.drawable.tooltip_arrow_up : R.drawable.tooltip_arrow);
         arrowImageView.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_chat_gifSaveHintBackground), PorterDuff.Mode.MULTIPLY));
-        if(currentType == 20){
-            arrowImageView.setColorFilter(new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.15f)), PorterDuff.Mode.MULTIPLY));
+        if (currentType == 20) {
+            arrowImageView.setColorFilter(lightFilter);
         }
         addView(arrowImageView, LayoutHelper.createFrame(14, 6, Gravity.LEFT | (topArrow ? Gravity.TOP : Gravity.BOTTOM), 0, 0, 0, 0));
+    }
+
+    public void updateBgDrawable(boolean isDark) {
+        if (isDarkBg != isDark) {
+            isDarkBg = isDark;
+            if (isDarkBg) {
+                arrowImageView.setColorFilter(darkFilter);
+                textView.setBackground(darkBgDrawable);
+            } else {
+                arrowImageView.setColorFilter(lightFilter);
+                textView.setBackground(lightBgDrawable);
+            }
+        }
     }
 
     public void setBackgroundColor(int background, int text) {
