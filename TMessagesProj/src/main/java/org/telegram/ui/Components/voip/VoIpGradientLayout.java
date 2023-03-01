@@ -98,6 +98,10 @@ public class VoIpGradientLayout extends FrameLayout {
         callingAnimator.start();
     }
 
+    public boolean isConnectedCalled() {
+        return state == GradientState.CONNECTED || state == GradientState.BAD_CONNECTION;
+    }
+
     public void switchToCallConnected(int x, int y) {
         if (state == GradientState.CONNECTED) return;
         state = GradientState.CONNECTED;

@@ -275,6 +275,9 @@ public class VoIPStatusTextView extends FrameLayout {
         } else {
             //полностью взяты параметры
             if (showBadConnection) {
+                if (badConnectionLayer.getVisibility() == View.VISIBLE) {
+                    return;
+                }
                 badConnectionLayer.setVisibility(View.VISIBLE);
                 badConnectionLayer.setAlpha(0f);
                 badConnectionLayer.setScaleY(0.6f);
@@ -282,6 +285,9 @@ public class VoIPStatusTextView extends FrameLayout {
                 badConnectionLayer.animate().setListener(null).cancel();
                 badConnectionLayer.animate().alpha(1f).scaleX(1f).scaleY(1f).setInterpolator(CubicBezierInterpolator.EASE_OUT_BACK).setDuration(300).start();
             } else {
+                if (badConnectionLayer.getVisibility() == View.GONE) {
+                    return;
+                }
                 badConnectionLayer.animate().alpha(0f).scaleX(0.6f).scaleY(0.6f).setInterpolator(CubicBezierInterpolator.DEFAULT).setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
