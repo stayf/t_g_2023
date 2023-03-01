@@ -133,13 +133,16 @@ public class EndCloseLayout extends FrameLayout {
         });
         transitionSet.setDuration(500);//взяли 500
         transitionSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
-
-        AndroidUtilities.runOnUIThread(this::switchToClose, 3000);
     }
 
-    public void switchToClose() {
+    public EndCloseView getEndCloseView() {
+        return endCloseView;
+    }
+
+    public void switchToClose(OnClickListener onClickListener) {
         if (isClosedState) return;
         isClosedState = true;
+
         TransitionManager.beginDelayedTransition(this, transitionSet);
         endCloseView.closeTextAlpha = 255;
         endCloseView.backColor = 0xFFffffff;
@@ -148,6 +151,7 @@ public class EndCloseLayout extends FrameLayout {
         ViewGroup.LayoutParams lp = endCloseView.getLayoutParams();
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         endCloseView.setLayoutParams(lp);
+        AndroidUtilities.runOnUIThread(() -> endCloseView.setOnClickListener(onClickListener), 500);
     }
 
     static class EndCloseView extends View {

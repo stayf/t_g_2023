@@ -151,6 +151,9 @@ public class VoIpSwitchLayout extends FrameLayout {
 
     public void setType(Type type, boolean isSelected) {
         if (this.type == type && isSelected == voIpButtonView.isSelectedState) {
+            if (getVisibility() != View.VISIBLE) {
+                setVisibility(View.VISIBLE);
+            }
             return;
         }
         if (getVisibility() != View.VISIBLE) {

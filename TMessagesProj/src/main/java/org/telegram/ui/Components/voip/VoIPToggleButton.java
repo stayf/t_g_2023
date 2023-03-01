@@ -122,9 +122,12 @@ public class VoIPToggleButton extends FrameLayout {
         drawBackground = value;
     }
 
+    public boolean disableDraw = false;
+
     @SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(Canvas canvas) {
+        if(disableDraw) return;
         if (animateBackground && replaceProgress != 0) {
             circlePaint.setColor(ColorUtils.blendARGB(backgroundColor, animateToBackgroundColor, replaceProgress));
         } else {

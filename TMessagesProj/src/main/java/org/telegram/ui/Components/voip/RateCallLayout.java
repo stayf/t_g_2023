@@ -64,8 +64,6 @@ public class RateCallLayout extends FrameLayout {
 
         addView(rateCallContainer, LayoutHelper.createFrame(300, 160, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
         addView(starsContainer, LayoutHelper.createFrame((StarContainer.starSize + 2) * 5, 100, Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 90, 0, 0));
-
-        AndroidUtilities.runOnUIThread(this::show, 3000);
     }
 
     public void show() {

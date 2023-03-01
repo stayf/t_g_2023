@@ -18,10 +18,12 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.EllipsizeSpanAnimator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -32,6 +34,8 @@ public class VoIPStatusTextView extends FrameLayout {
 
     TextView[] textView = new TextView[2];
     TextView reconnectTextView;
+    TextView badConnectionTextView;
+    FrameLayout badConnectionLayer;
     VoIPTimerView timerView;
 
     CharSequence nextTextToSet;
@@ -54,6 +58,18 @@ public class VoIPStatusTextView extends FrameLayout {
             textView[i].setGravity(Gravity.CENTER_HORIZONTAL);
             addView(textView[i]);
         }
+
+        badConnectionLayer = new FrameLayout(context);
+        badConnectionTextView = new TextView(context);
+        badConnectionTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        badConnectionTextView.setTextColor(Color.WHITE);
+        badConnectionTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+        badConnectionTextView.setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f))));
+        badConnectionTextView.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(2), AndroidUtilities.dp(12), AndroidUtilities.dp(2));
+        badConnectionTextView.setText("Weak network signal");
+        badConnectionLayer.addView(badConnectionTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 0, 0, 0));
+        badConnectionLayer.setVisibility(View.GONE);
+        addView(badConnectionLayer, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 44, 0, 0));
 
         reconnectTextView = new TextView(context);
         reconnectTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
@@ -250,6 +266,34 @@ public class VoIPStatusTextView extends FrameLayout {
         } else {
             ellipsizeAnimator.removeView(reconnectTextView);
         }
+    }
+
+    public void showBadConnection(boolean showBadConnection, boolean animated) {
+        if (!animated) {
+            badConnectionLayer.animate().setListener(null).cancel();
+            badConnectionLayer.setVisibility(showBadConnection ? View.VISIBLE : View.GONE);
+        } else {
+            //полностью взяты параметры
+            if (showBadConnection) {
+                badConnectionLayer.setVisibility(View.VISIBLE);
+                badConnectionLayer.setAlpha(0f);
+                badConnectionLayer.setScaleY(0.6f);
+                badConnectionLayer.setScaleX(0.6f);
+                badConnectionLayer.animate().setListener(null).cancel();
+                badConnectionLayer.animate().alpha(1f).scaleX(1f).scaleY(1f).setInterpolator(CubicBezierInterpolator.EASE_OUT_BACK).setDuration(300).start();
+            } else {
+                badConnectionLayer.animate().alpha(0f).scaleX(0.6f).scaleY(0.6f).setInterpolator(CubicBezierInterpolator.DEFAULT).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        badConnectionLayer.setVisibility(View.GONE);
+                    }
+                }).setDuration(300).start();
+            }
+        }
+    }
+
+    public void setDrawCallIcon() {
+        timerView.setDrawCallIcon();
     }
 
     @Override

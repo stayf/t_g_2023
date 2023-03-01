@@ -80,13 +80,6 @@ public class VoIpGradientLayout extends FrameLayout {
         defaultAnimatorSet.start();
 
         switchToCalling();
-        /*AndroidUtilities.runOnUIThread(() -> {
-            switchToCallConnected(30, 30);
-            AndroidUtilities.runOnUIThread(() -> {
-                pause();
-                AndroidUtilities.runOnUIThread(this::resume, 6000);
-            }, 3000);
-        }, 3000);*/
     }
 
     public void switchToCalling() {
