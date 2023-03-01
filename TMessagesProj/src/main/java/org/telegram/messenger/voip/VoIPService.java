@@ -9,6 +9,9 @@
 package org.telegram.messenger.voip;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -25,6 +28,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -32,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -110,6 +115,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.BottomSheet;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AvatarDrawable;
+import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.JoinCallAlert;
 import org.telegram.ui.Components.voip.VoIPHelper;
 import org.telegram.ui.LaunchActivity;
@@ -1569,6 +1575,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		}
 	}
 
+	public void sendCallRating(int rating) {
+		VoIPHelper.sendCallRating(privateCall.id, privateCall.access_hash, currentAccount, rating);
+	}
+
 	public byte[] getEncryptionKey() {
 		return authKey;
 	}
@@ -2661,6 +2671,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	}
 
 	public void toggleSpeakerphoneOrShowRouteSheet(Context context, boolean fromOverlayWindow) {
+		toggleSpeakerphoneOrShowRouteSheet(context, fromOverlayWindow, null);
+	}
+
+	public void toggleSpeakerphoneOrShowRouteSheet(Context context, boolean fromOverlayWindow, Integer selectedPos) {
 		if (isBluetoothHeadsetConnected() && hasEarpiece()) {
 			BottomSheet.Builder builder = new BottomSheet.Builder(context)
 					.setTitle(LocaleController.getString("VoipOutputDevices", R.string.VoipOutputDevices), true)
@@ -2686,6 +2700,35 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				}
 			}
 			builder.show();
+			if (selectedPos != null) {
+				for (int i = 0; i < bottomSheet.getItemViews().size(); i++) {
+					//отключаем рипл эффект при нажатии. На видео его нет.
+					bottomSheet.getItemViews().get(i).setBackgroundDrawable(null);
+				}
+				bottomSheet.setItemColor(selectedPos, Color.BLUE, Color.BLUE);
+				bottomSheet.setBeforeCloseListener((dialog, which) -> {
+					if (selectedPos != which) {
+						int color1 = bottomSheet.getItemViews().get(selectedPos).getTextView().getCurrentTextColor();
+						int color2 = bottomSheet.getItemViews().get(which).getTextView().getCurrentTextColor();
+						ValueAnimator animator = ValueAnimator.ofArgb(color1, color2);
+						animator.addUpdateListener(a -> {
+							int color = (int) a.getAnimatedValue();
+							bottomSheet.setItemColor(selectedPos, color, color);
+						});
+						animator.setDuration(60);
+						animator.setInterpolator(CubicBezierInterpolator.DEFAULT);
+						animator.start();
+						ValueAnimator animator2 = ValueAnimator.ofArgb(color2, color1);
+						animator2.addUpdateListener(a -> {
+							int color = (int) a.getAnimatedValue();
+							bottomSheet.setItemColor(which, color, color);
+						});
+						animator2.setDuration(60);
+						animator2.setInterpolator(CubicBezierInterpolator.DEFAULT);
+						animator2.start();
+					}
+				});
+			}
 			return;
 		}
 		if (USE_CONNECTION_SERVICE && systemCallConnection != null && systemCallConnection.getCallAudioState() != null) {
@@ -3391,6 +3434,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 		return ret;
 	}
 
+	public boolean hasRate() {
+		return needRateCall || forceRating;
+	}
+
 	private void onTgVoipStop(Instance.FinalState finalState) {
 		if (user == null) {
 			return;
@@ -3402,9 +3449,9 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (needRateCall || forceRating || finalState.isRatingSuggested) {
-			startRatingActivity();
+			//startRatingActivity();
 			needRateCall = false;
 		}
 		if (needSendDebugLog && finalState.debugLog != null) {

@@ -91,6 +91,7 @@ public class BottomSheet extends Dialog {
     protected boolean useHardwareLayer = true;
 
     private DialogInterface.OnClickListener onClickListener;
+    private DialogInterface.OnClickListener beforeCloseListener;
 
     private CharSequence[] items;
     private int[] itemIcons;
@@ -1450,6 +1451,10 @@ public class BottomSheet extends Dialog {
         onClickListener = listener;
     }
 
+    public void setBeforeCloseListener(final OnClickListener listener) {
+        beforeCloseListener = listener;
+    }
+
     public void setTitleColor(int color) {
         if (titleView == null) {
             return;
@@ -1464,6 +1469,9 @@ public class BottomSheet extends Dialog {
     public void dismissWithButtonClick(final int item) {
         if (dismissed) {
             return;
+        }
+        if (beforeCloseListener != null) {
+            beforeCloseListener.onClick(BottomSheet.this, item);
         }
         dismissed = true;
         cancelSheetAnimation();

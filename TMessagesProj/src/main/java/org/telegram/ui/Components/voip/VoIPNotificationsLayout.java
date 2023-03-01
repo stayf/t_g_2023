@@ -56,13 +56,26 @@ public class VoIPNotificationsLayout extends LinearLayout {
                         public Animator onAppear(ViewGroup sceneRoot, View view, TransitionValues startValues, TransitionValues endValues) {
                             AnimatorSet set = new AnimatorSet();
                             view.setAlpha(0);
+                            view.setScaleY(0.6f);
+                            view.setScaleX(0.6f);
                             set.playTogether(
                                     ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1f),
-                                    ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, view.getMeasuredHeight(), 0)
+                                    ObjectAnimator.ofFloat(view, View.SCALE_X, 0.6f, 1f),
+                                    ObjectAnimator.ofFloat(view, View.SCALE_Y, 0.6f, 1f)
                             );
+                            set.setInterpolator(CubicBezierInterpolator.EASE_OUT_BACK);
+                            return set;
+                        }
 
+                        @Override
+                        public Animator onDisappear(ViewGroup sceneRoot, View view, TransitionValues startValues, TransitionValues endValues) {
+                            AnimatorSet set = new AnimatorSet();
+                            set.playTogether(
+                                    ObjectAnimator.ofFloat(view, View.ALPHA, 1f, 0f),
+                                    ObjectAnimator.ofFloat(view, View.SCALE_X, 1f, 0.6f),
+                                    ObjectAnimator.ofFloat(view, View.SCALE_Y, 1f, 0.6f)
+                            );
                             set.setInterpolator(CubicBezierInterpolator.DEFAULT);
-
                             return set;
                         }
                     }.setDuration(200));
@@ -81,9 +94,9 @@ public class VoIPNotificationsLayout extends LinearLayout {
         view.textView.setText(text);
         viewsByTag.put(tag, view);
 
-        if (animated) {
+        /*if (animated) {
             view.startAnimation();
-        }
+        }*/
         if (lockAnimation) {
             viewToAdd.add(view);
         } else {
@@ -193,7 +206,7 @@ public class VoIPNotificationsLayout extends LinearLayout {
             setFocusableInTouchMode(true);
 
             iconView = new ImageView(context);
-            setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f))));
+            setBackground(Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.15f))));
             addView(iconView, LayoutHelper.createFrame(24, 24, 0, 10, 4, 10, 4));
 
             textView = new TextView(context);
@@ -203,7 +216,7 @@ public class VoIPNotificationsLayout extends LinearLayout {
         }
 
         public void startAnimation() {
-            textView.setVisibility(View.GONE);
+            textView.setVisibility(View.INVISIBLE);
             postDelayed(() -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     TransitionSet transitionSet = new TransitionSet();

@@ -998,7 +998,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 }
             }
         });
-        acceptDeclineView.setScreenWasWakeup(screenWasWakeup);
+        acceptDeclineView.setScreenWasWakeup(false);
         acceptDeclineView.setScaleX(1.15f);
         acceptDeclineView.setScaleY(1.15f);
 
@@ -1781,6 +1781,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         if (currentUserIsVideo || callingUserIsVideo) {
             fillNavigationBar(true, animated);
+            callingUserPhotoView.setVisibility(View.INVISIBLE);
         } else {
             fillNavigationBar(false, animated);
             callingUserPhotoView.setVisibility(View.VISIBLE);
