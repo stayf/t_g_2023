@@ -118,7 +118,7 @@ public class AcceptDeclineView extends View {
         callAcceptDrawable.setAutoRepeat(1);
         callAcceptDrawable.setMasterParent(this);
         acceptCirclePaint.setColor(Color.WHITE);
-        acceptCirclePaint.setAlpha(30);
+        acceptCirclePaint.setAlpha(20);
         rippleDrawable = Theme.createSimpleSelectorCircleDrawable(AndroidUtilities.dp(52), 0, ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f)));
         rippleDrawable.setCallback(this);
 

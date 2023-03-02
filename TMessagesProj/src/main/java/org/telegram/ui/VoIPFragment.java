@@ -497,7 +497,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         } else if (id == NotificationCenter.closeInCallActivity) {
             windowView.finish();
         } else if (id == NotificationCenter.webRtcMicAmplitudeEvent) {
-            callingUserPhotoViewMini.setAmplitude((float) args[0] * 5.0f);
+            callingUserPhotoViewMini.setAmplitude((float) args[0] * 10.0f);
         }
     }
 

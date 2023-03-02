@@ -71,21 +71,30 @@ public class BlobDrawable {
         speed = new float[n];
 
         for (int i = 0; i < N; i++) {
-            generateBlob(radius, angle, i);
-            generateBlob(radiusNext, angleNext, i);
+            generateBlob(radius, angle, i, 1f);
+            generateBlob(radiusNext, angleNext, i, 1f);
             progress[i] = 0;
         }
     }
 
-    private void generateBlob(float[] radius, float[] angle, int i) {
+    private void generateBlob(float[] radius, float[] angle, int i, float muteToStaticProgress) {
         float angleDif = 360f / N * 0.05f;
         float radDif = maxRadius - minRadius;
-        radius[i] = minRadius + Math.abs(((random.nextInt() % 100f) / 100f)) * radDif;
-        angle[i] = 360f / N * i + ((random.nextInt() % 100f) / 100f) * angleDif;
+        if (muteToStaticProgress < 1f) {
+            radius[i] = minRadius + ((Math.abs(((random.nextInt() % 100f) / 100f)) * radDif) * muteToStaticProgress);
+            angle[i] = 360f / N * i + (((random.nextInt() * muteToStaticProgress) % 100f) / 100f) * angleDif;
+        } else {
+            radius[i] = minRadius + Math.abs(((random.nextInt() % 100f) / 100f)) * radDif;
+            angle[i] = 360f / N * i + ((random.nextInt() % 100f) / 100f) * angleDif;
+        }
         speed[i] = (float) (0.017 + 0.003 * (Math.abs(random.nextInt() % 100f) / 100f));
     }
 
     public void update(float amplitude, float speedScale) {
+        update(amplitude, speedScale, 1f);
+    }
+
+    public void update(float amplitude, float speedScale, float muteToStaticProgress) {
         if (!LiteMode.isEnabled(LiteMode.FLAG_CALLS_ANIMATIONS)) {
             return;
         }
@@ -95,7 +104,7 @@ public class BlobDrawable {
                 progress[i] = 0;
                 radius[i] = radiusNext[i];
                 angle[i] = angleNext[i];
-                generateBlob(radiusNext, angleNext, i);
+                generateBlob(radiusNext, angleNext, i, muteToStaticProgress);
             }
         }
     }
@@ -154,8 +163,8 @@ public class BlobDrawable {
 
     public void generateBlob() {
         for (int i = 0; i < N; i++) {
-            generateBlob(radius, angle, i);
-            generateBlob(radiusNext, angleNext, i);
+            generateBlob(radius, angle, i, 1f);
+            generateBlob(radiusNext, angleNext, i, 1f);
             progress[i] = 0;
         }
     }
