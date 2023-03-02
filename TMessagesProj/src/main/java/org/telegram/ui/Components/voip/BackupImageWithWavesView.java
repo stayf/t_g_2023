@@ -63,6 +63,7 @@ public class BackupImageWithWavesView extends FrameLayout {
     public void setMute(boolean isMuted, boolean isFast) {
         if (this.isMuted != isMuted) {
             this.isMuted = isMuted;
+            if (isMuted) avatarWavesDrawable.setAmplitude(3f);
             avatarWavesDrawable.setMuteToStatic(isMuted, isFast);
         }
     }
@@ -126,8 +127,8 @@ public class BackupImageWithWavesView extends FrameLayout {
         private final BlobDrawable blobDrawable;
         private final BlobDrawable blobDrawable2;
 
-        private boolean muteToStatic = false;
-        private float muteToStaticProgress = 1f;
+        public boolean muteToStatic = false;
+        public float muteToStaticProgress = 1f;
 
         public AvatarWavesDrawable(int minRadius, int maxRadius, int diff) {
             blobDrawable = new BlobDrawable(3);

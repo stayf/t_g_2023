@@ -1142,6 +1142,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             int[] loc = new int[2];
             acceptDeclineView.getLocationOnScreen(loc);
             callingUserPhotoView.switchToCallConnected(loc[0] + AndroidUtilities.dp(82), loc[1] + AndroidUtilities.dp(74));
+            acceptDeclineView.stopAnimations();
             after.run();
             return;
         }
@@ -1152,6 +1153,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         bottomVideoBtn.animate().cancel();
         int[] loc = new int[2];
         acceptDeclineView.getLocationOnScreen(loc);
+        acceptDeclineView.stopAnimations();
         callingUserPhotoView.switchToCallConnected(loc[0] + AndroidUtilities.dp(82), loc[1] + AndroidUtilities.dp(74));
         bottomEndCallBtn.setData(R.drawable.calls_decline, Color.WHITE, 0xFFF01D2C, LocaleController.getString("VoipEndCall", R.string.VoipEndCall), false, false);
         bottomSpeakerBtn.setType(VoIpSwitchLayout.Type.SPEAKER, false);

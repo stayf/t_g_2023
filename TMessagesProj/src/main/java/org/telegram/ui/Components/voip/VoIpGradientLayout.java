@@ -82,6 +82,13 @@ public class VoIpGradientLayout extends FrameLayout {
         switchToCalling();
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (defaultAnimatorSet != null) defaultAnimatorSet.cancel();
+        if (connectedAnimatorSet != null) connectedAnimatorSet.cancel();
+    }
+
     public void switchToCalling() {
         if (state == GradientState.CALLING) return;
         state = GradientState.CALLING;

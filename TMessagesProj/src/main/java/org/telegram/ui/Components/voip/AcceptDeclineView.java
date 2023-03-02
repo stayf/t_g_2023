@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -84,9 +83,16 @@ public class AcceptDeclineView extends View {
 
     float arrowProgress;
     private RLottieDrawable callAcceptDrawable;
+    private final BackupImageWithWavesView.AvatarWavesDrawable avatarWavesDrawable;
 
     public AcceptDeclineView(@NonNull Context context) {
         super(context);
+        avatarWavesDrawable = new BackupImageWithWavesView.AvatarWavesDrawable(AndroidUtilities.dp(45), AndroidUtilities.dp(50), AndroidUtilities.dp(8));
+        avatarWavesDrawable.muteToStatic = true;
+        avatarWavesDrawable.muteToStaticProgress = 0f;
+        avatarWavesDrawable.wavesEnter = 0;
+        avatarWavesDrawable.setAmplitude(0);
+
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         buttonWidth = AndroidUtilities.dp(60);
         acceptDrawable = new FabBackgroundDrawable();
@@ -116,6 +122,7 @@ public class AcceptDeclineView extends View {
         cancelDrawable.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
         callAcceptDrawable = new RLottieDrawable(R.raw.call_accept, "" + R.raw.call_accept, AndroidUtilities.dp(48), AndroidUtilities.dp(48), true, null);
         callAcceptDrawable.setAutoRepeat(1);
+        callAcceptDrawable.setCustomEndFrame(90);
         callAcceptDrawable.setMasterParent(this);
         acceptCirclePaint.setColor(Color.WHITE);
         acceptCirclePaint.setAlpha(20);
@@ -306,7 +313,7 @@ public class AcceptDeclineView extends View {
                     alpha = 0.5f + p;
                 }
                 canvas.save();
-                canvas.clipRect(leftOffsetX + AndroidUtilities.dp(46) + buttonWidth / 2,0,getMeasuredHeight(),getMeasuredWidth() >> 1);
+                canvas.clipRect(leftOffsetX + AndroidUtilities.dp(46) + buttonWidth / 2, 0, getMeasuredHeight(), getMeasuredWidth() >> 1);
                 arrowDrawable.setAlpha((int) (255 * alpha));
                 arrowDrawable.setBounds(x, cY - arrowDrawable.getIntrinsicHeight() / 2, x + arrowDrawable.getIntrinsicWidth(), cY + arrowDrawable.getIntrinsicHeight() / 2);
                 arrowDrawable.draw(canvas);
@@ -351,8 +358,9 @@ public class AcceptDeclineView extends View {
         canvas.save();
         canvas.translate(leftOffsetX + AndroidUtilities.dp(46), 0);
         if (!retryMod) {
-            canvas.drawCircle(buttonWidth / 2f, buttonWidth / 2f, buttonWidth / 2f - AndroidUtilities.dp(4) + bigRadius, acceptCirclePaint);
-            canvas.drawCircle(buttonWidth / 2f, buttonWidth / 2f, buttonWidth / 2f - AndroidUtilities.dp(4) + smallRadius, acceptCirclePaint);
+            avatarWavesDrawable.update();
+            int cx = (int) (buttonWidth / 2f);
+            avatarWavesDrawable.draw(canvas, cx, cx, this);
         }
         acceptDrawable.draw(canvas);
         acceptRect.set(AndroidUtilities.dp(46), AndroidUtilities.dp(40), AndroidUtilities.dp(46) + buttonWidth, AndroidUtilities.dp(40) + buttonWidth);
@@ -393,6 +401,8 @@ public class AcceptDeclineView extends View {
         void onDecline();
     }
 
+    private ValueAnimator callAnimator;
+
     public void setRetryMod(boolean retryMod) {
         this.retryMod = retryMod;
         if (retryMod) {
@@ -400,8 +410,33 @@ public class AcceptDeclineView extends View {
             screenWasWakeup = false;
         } else {
             callAcceptDrawable.start();
+            avatarWavesDrawable.setShowWaves(true, this);
             declineDrawable.setColor(0xFFF01D2C);
+
+            callAnimator = ValueAnimator.ofInt(0, 40, 0, 0, 40, 0, 0, 0, 0);
+            callAnimator.addUpdateListener(a -> {
+                avatarWavesDrawable.setAmplitude((int) a.getAnimatedValue());
+            });
+
+            callAnimator.setDuration(1500);
+            callAnimator.setRepeatMode(ValueAnimator.RESTART);
+            callAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            callAnimator.start();
         }
+    }
+
+    public void stopAnimations() {
+        if (callAnimator != null) {
+            callAnimator.cancel();
+            callAnimator = null;
+            callAcceptDrawable.stop();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        stopAnimations();
     }
 
     @Override
