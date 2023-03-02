@@ -461,7 +461,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         isOutgoing = VoIPService.getSharedInstance().isOutgoing();
         previousState = -1;
         currentState = VoIPService.getSharedInstance().getCallState();
-        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.webRtcSpeakerAmplitudeEvent);
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.voipServiceCreated);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
         NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.closeInCallActivity);
@@ -473,7 +473,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         if (service != null) {
             service.unregisterStateListener(this);
         }
-        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.webRtcMicAmplitudeEvent);
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.webRtcSpeakerAmplitudeEvent);
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.voipServiceCreated);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.closeInCallActivity);
@@ -505,8 +505,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             updateKeyView(true);
         } else if (id == NotificationCenter.closeInCallActivity) {
             windowView.finish();
-        } else if (id == NotificationCenter.webRtcMicAmplitudeEvent) {
-            callingUserPhotoViewMini.setAmplitude((float) args[0] * 10.0f);
+        } else if (id == NotificationCenter.webRtcSpeakerAmplitudeEvent) {
+            callingUserPhotoViewMini.setAmplitude((float) args[0] * 8.0f);
         } else if (id == NotificationCenter.nearEarEvent) {
             boolean isNearEar = (boolean) args[0];
             if (isNearEar) {
