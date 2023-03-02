@@ -168,10 +168,10 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     Paint overlayPaint = new Paint();
     Paint overlayBottomPaint = new Paint();
 
-    private Drawable lightBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
-    private Drawable darkBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
-    private Drawable lightBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
-    private Drawable darkBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+    private final Drawable lightBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+    private final Drawable darkBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
+    private final Drawable lightBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+    private final Drawable darkBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
     private boolean isDarkBg = false;
 
     boolean isOutgoing;
@@ -1041,8 +1041,23 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             if (speakerPhoneIcon.getTag() == null) {
                 return;
             }
-            if (VoIPService.getSharedInstance() != null) {
-                VoIPService.getSharedInstance().toggleSpeakerphoneOrShowRouteSheet(activity, false);
+            VoIPService service = VoIPService.getSharedInstance();
+            if (service != null) {
+                AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+                hideUiRunnableWaiting = false;
+                if (canHideUI && !service.isMicMute()) {
+                    AndroidUtilities.runOnUIThread(hideUIRunnable, 3000);
+                    hideUiRunnableWaiting = true;
+                }
+                final int selectedSpeaker;
+                if (service.isBluetoothOn()) {
+                    selectedSpeaker = 2;
+                } else if (service.isSpeakerphoneOn()) {
+                    selectedSpeaker = 0;
+                } else {
+                    selectedSpeaker = 1;
+                }
+                service.toggleSpeakerphoneOrShowRouteSheet(activity, false, selectedSpeaker);
             }
         });
 
@@ -1511,7 +1526,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 SharedConfig.toggleCallEncryptionHintDisplayed();
             }
             encryptionTooltip.hide();
-            AndroidUtilities.runOnUIThread(hideUIRunnable);
+            AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
             hideUiRunnableWaiting = false;
 
             if (callingUserPhotoViewMini.getVisibility() == View.VISIBLE) {
@@ -2387,6 +2402,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             bottomEndCallBtn.setData(R.drawable.calls_decline, Color.WHITE, 0xFFF01D2C, LocaleController.getString("VoipEndCall", R.string.VoipEndCall), false, animated);
             bottomEndCallBtn.setOnClickListener(view -> {
                 if (VoIPService.getSharedInstance() != null) {
+                    AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+                    hideUiRunnableWaiting = false;
                     VoIPService.getSharedInstance().hangUp();
                 }
             });
@@ -2417,6 +2434,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         bottomButton.setOnBtnClickedListener((view) -> {
             final VoIPService serviceInstance = VoIPService.getSharedInstance();
             if (serviceInstance != null) {
+                AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+                hideUiRunnableWaiting = false;
                 final boolean micMute = !serviceInstance.isMicMute();
                 if (accessibilityManager.isTouchExplorationEnabled()) {
                     final String text;
@@ -2452,6 +2471,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 bottomButton.setType(VoIpSwitchLayout.Type.VIDEO, true);
             }
             bottomButton.setOnBtnClickedListener(view -> {
+                AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+                hideUiRunnableWaiting = false;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     activity.requestPermissions(new String[]{Manifest.permission.CAMERA}, 102);
                 } else {
@@ -2510,6 +2531,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         bottomButton.setEnabled(true);
         bottomButton.setOnBtnClickedListener(view -> {
             if (VoIPService.getSharedInstance() != null) {
+                AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+                hideUiRunnableWaiting = false;
                 VoIPService.getSharedInstance().toggleSpeakerphoneOrShowRouteSheet(activity, false, selectedSpeaker);
             }
         });
@@ -2530,6 +2553,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             bottomButton.setOnBtnClickedListener(view -> {
                 final VoIPService serviceInstance = VoIPService.getSharedInstance();
                 if (serviceInstance != null) {
+                    AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
+                    hideUiRunnableWaiting = false;
                     if (accessibilityManager.isTouchExplorationEnabled()) {
                         final String text;
                         if (service.isFrontFaceCamera()) {
