@@ -60,10 +60,10 @@ public class BackupImageWithWavesView extends FrameLayout {
         avatarWavesDrawable.setShowWaves(showWaves, this);
     }
 
-    public void setMute(boolean isMuted) {
+    public void setMute(boolean isMuted, boolean isFast) {
         if (this.isMuted != isMuted) {
             this.isMuted = isMuted;
-            avatarWavesDrawable.setMuteToStatic(isMuted);
+            avatarWavesDrawable.setMuteToStatic(isMuted, isFast);
         }
     }
 
@@ -216,17 +216,26 @@ public class BackupImageWithWavesView extends FrameLayout {
             animateAmplitudeDiff = (animateToAmplitude - this.amplitude) / 200;
         }
 
-        public void setMuteToStatic(boolean mute) {
+        private ValueAnimator animator;
+
+        public void setMuteToStatic(boolean mute, boolean isFast) {
             if (muteToStatic != mute) {
                 muteToStatic = mute;
-                ValueAnimator animator;
+                if (animator != null) {
+                    animator.removeAllUpdateListeners();
+                    animator.cancel();
+                }
                 if (mute) {
-                    animator = ValueAnimator.ofFloat(1f, 0f);
+                    animator = ValueAnimator.ofFloat(muteToStaticProgress, 0f);
                 } else {
-                    animator = ValueAnimator.ofFloat(0f, 1f);
+                    animator = ValueAnimator.ofFloat(muteToStaticProgress, 1f);
                 }
                 animator.addUpdateListener(a -> muteToStaticProgress = (float) a.getAnimatedValue());
-                animator.setDuration(1000);
+                if (isFast) {
+                    animator.setDuration(150);
+                } else {
+                    animator.setDuration(1000);
+                }
                 animator.start();
             }
         }

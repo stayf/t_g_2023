@@ -3736,6 +3736,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			}
 			boolean newIsNear = event.values[0] < Math.min(event.sensor.getMaximumRange(), 3);
 			checkIsNear(newIsNear);
+			NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.nearEarEvent, newIsNear);
 		}
 	}
 
