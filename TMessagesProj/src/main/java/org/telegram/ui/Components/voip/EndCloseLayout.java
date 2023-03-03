@@ -139,11 +139,14 @@ public class EndCloseLayout extends FrameLayout {
         return endCloseView;
     }
 
-    public void switchToClose(OnClickListener onClickListener) {
+    public void switchToClose(OnClickListener onClickListener, boolean animate) {
         if (isClosedState) return;
         isClosedState = true;
 
-        TransitionManager.beginDelayedTransition(this, transitionSet);
+        if (animate) {
+            TransitionManager.beginDelayedTransition(this, transitionSet);
+        }
+
         endCloseView.closeTextAlpha = 255;
         endCloseView.backColor = 0xFFffffff;
         endCloseView.callDeclineAlpha = 0;

@@ -1699,20 +1699,40 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 boolean hasRate = service != null && service.hasRate();
                 currentUserTextureView.saveCameraLastBitmap();
                 if (hasRate && !isFinished) {
-                    int w = AndroidUtilities.displaySize.x;
-                    int[] locEndCall = new int[2];
-                    bottomEndCallBtn.getLocationOnScreen(locEndCall);
-                    int marginCloseBtn = w - locEndCall[0] - (((bottomEndCallBtn.getMeasuredWidth() - AndroidUtilities.dp(52)) / 2)) - AndroidUtilities.dp(52);
-                    ViewGroup.MarginLayoutParams lpCloseBtn = (ViewGroup.MarginLayoutParams) endCloseLayout.getLayoutParams();
-                    lpCloseBtn.rightMargin = marginCloseBtn;
-                    lpCloseBtn.leftMargin = marginCloseBtn;
-                    endCloseLayout.setTranslationY(locEndCall[1]);
-                    endCloseLayout.setAlpha(1f);
-                    endCloseLayout.setLayoutParams(lpCloseBtn);
-                    AndroidUtilities.runOnUIThread(() -> endCloseLayout.switchToClose(v -> {
-                        AndroidUtilities.runOnUIThread(() -> windowView.finish());
-                        if (selectedRating > 0) service.sendCallRating(selectedRating);
-                    }), 2);
+                    final boolean uiVisibleLocal = uiVisible;
+                    if (uiVisibleLocal) {
+                        int[] locEndCall = new int[2];
+                        int w = AndroidUtilities.displaySize.x;
+                        bottomEndCallBtn.getLocationOnScreen(locEndCall);
+                        int marginCloseBtn = w - locEndCall[0] - (((bottomEndCallBtn.getMeasuredWidth() - AndroidUtilities.dp(52)) / 2)) - AndroidUtilities.dp(52);
+                        ViewGroup.MarginLayoutParams lpCloseBtn = (ViewGroup.MarginLayoutParams) endCloseLayout.getLayoutParams();
+                        lpCloseBtn.rightMargin = marginCloseBtn;
+                        lpCloseBtn.leftMargin = marginCloseBtn;
+                        endCloseLayout.setTranslationY(locEndCall[1]);
+                        endCloseLayout.setAlpha(1f);
+                        endCloseLayout.setLayoutParams(lpCloseBtn);
+                        AndroidUtilities.runOnUIThread(() -> endCloseLayout.switchToClose(v -> {
+                            AndroidUtilities.runOnUIThread(() -> windowView.finish());
+                            if (selectedRating > 0) service.sendCallRating(selectedRating);
+                        }, true), 2);
+                    } else {
+                        buttonsLayout.setVisibility(View.GONE);
+                        FrameLayout.LayoutParams lpCloseBtn = (FrameLayout.LayoutParams) endCloseLayout.getLayoutParams();
+                        lpCloseBtn.rightMargin = AndroidUtilities.dp(18);
+                        lpCloseBtn.leftMargin = AndroidUtilities.dp(18);
+                        lpCloseBtn.bottomMargin = AndroidUtilities.dp(36);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH && lastInsets != null) {
+                            lpCloseBtn.bottomMargin += lastInsets.getSystemWindowInsetBottom();
+                        }
+                        lpCloseBtn.gravity = Gravity.BOTTOM;
+                        endCloseLayout.setLayoutParams(lpCloseBtn);
+                        endCloseLayout.animate().alpha(1f).setDuration(250).start();
+                        endCloseLayout.switchToClose(v -> {
+                            AndroidUtilities.runOnUIThread(() -> windowView.finish());
+                            if (selectedRating > 0) service.sendCallRating(selectedRating);
+                        }, false);
+                    }
+
                     rateCallLayout.setVisibility(View.VISIBLE);
                     rateCallLayout.show(count -> selectedRating = count);
                     if (emojiExpanded) {
@@ -1732,6 +1752,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                         }
                     }).start();
                     speakerPhoneIcon.animate().alpha(0f).setInterpolator(CubicBezierInterpolator.DEFAULT).setDuration(250).start();
+                    speakerPhoneIcon.setVisibility(View.GONE);
                     statusTextView.showBadConnection(false, true);
                     statusTextView.setDrawCallIcon();
                     callingUserPhotoViewMini.onNeedRating();

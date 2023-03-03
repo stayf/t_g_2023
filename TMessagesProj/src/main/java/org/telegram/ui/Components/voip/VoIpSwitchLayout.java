@@ -414,6 +414,9 @@ public class VoIpSwitchLayout extends FrameLayout {
             return !isUnSelected && !isSelected;
         }
 
+        private float startX;
+        private float startY;
+
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public boolean onTouchEvent(MotionEvent event) {
@@ -421,11 +424,15 @@ public class VoIpSwitchLayout extends FrameLayout {
                 case MotionEvent.ACTION_DOWN:
                     animate().scaleX(0.8f).scaleY(0.8f).setDuration(150).start();
                     animate().scaleX(0.8f).scaleY(0.8f).setDuration(150).start();
+                    startX = event.getX();
+                    startY = event.getY();
                     break;
                 case MotionEvent.ACTION_UP:
                     animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
                     animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
-                    if (event.getX() < getWidth() && event.getY() < getHeight()) {
+                    float endX = event.getX();
+                    float endY = event.getY();
+                    if (isClick(startX, endX, startY, endY)) {
                         if (onBtnClickedListener != null) onBtnClickedListener.onClicked(this);
                     }
                     break;
@@ -435,6 +442,12 @@ public class VoIpSwitchLayout extends FrameLayout {
                     break;
             }
             return true;
+        }
+
+        private boolean isClick(float startX, float endX, float startY, float endY) {
+            float differenceX = Math.abs(startX - endX);
+            float differenceY = Math.abs(startY - endY);
+            return !(differenceX > AndroidUtilities.dp(48) || differenceY > AndroidUtilities.dp(48));
         }
     }
 }

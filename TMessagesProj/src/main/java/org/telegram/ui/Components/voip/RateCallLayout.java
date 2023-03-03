@@ -210,14 +210,12 @@ public class RateCallLayout extends FrameLayout {
                             selectedStar.animate().scaleX(1.0f).scaleY(1.0f).setDuration(250).start();
                         }
                     }
-                    if (event.getX() < getWidth() && event.getY() < getHeight()) {
-                        if (onSelectedStar != null) {
-                            int[] location = new int[2];
-                            getLocationOnScreen(location);
-                            int viewX = location[0];
-                            int viewY = location[1];
-                            onSelectedStar.onSelected(viewX + (getWidth() / 2f), viewY + (getHeight() / 2f), this.pos + 1);
-                        }
+                    if (onSelectedStar != null) {
+                        int[] location = new int[2];
+                        getLocationOnScreen(location);
+                        int viewX = location[0];
+                        int viewY = location[1];
+                        onSelectedStar.onSelected(viewX + (getWidth() / 2f), viewY + (getHeight() / 2f), this.pos + 1);
                     }
                     break;
                 case MotionEvent.ACTION_CANCEL:
