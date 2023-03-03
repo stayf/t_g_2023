@@ -1,5 +1,7 @@
 package org.telegram.ui.Components;
 
+import static org.telegram.ui.VoIPFragment.LIGHT_BG_ALPHA_PERCENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -83,9 +85,9 @@ public class HintView extends FrameLayout {
         } else {
             isDarkBg = true;
         }
-        lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+        lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * LIGHT_BG_ALPHA_PERCENT)));
         darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(6), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
-        lightFilter = new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)), PorterDuff.Mode.MULTIPLY);
+        lightFilter = new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * LIGHT_BG_ALPHA_PERCENT)), PorterDuff.Mode.MULTIPLY);
         darkFilter = new PorterDuffColorFilter(ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)), PorterDuff.Mode.MULTIPLY);
 
         textView = new CorrectlyMeasuringTextView(context);

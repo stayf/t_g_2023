@@ -230,7 +230,7 @@ public class VoIpSwitchLayout extends FrameLayout {
     }
 
     public static class VoIpButtonView extends View {
-        private static final float DARK_LIGHT_PERCENT = 0.15f;
+        private static final float DARK_LIGHT_PERCENT = 0.12f;
         private static final int DARK_LIGHT_DEFAULT_ALPHA = (int) (255 * DARK_LIGHT_PERCENT);
         private static final int ITEM_SIZE = 52;
 

@@ -1,5 +1,7 @@
 package org.telegram.ui.Components.voip;
 
+import static org.telegram.ui.VoIPFragment.LIGHT_BG_ALPHA_PERCENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -63,7 +65,7 @@ public class VoIPStatusTextView extends FrameLayout {
             addView(textView[i]);
         }
 
-        lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+        lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * LIGHT_BG_ALPHA_PERCENT)));
         darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
         isDarkBg = false;
 

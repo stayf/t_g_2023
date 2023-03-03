@@ -1,5 +1,7 @@
 package org.telegram.ui.Components.voip;
 
+import static org.telegram.ui.VoIPFragment.LIGHT_BG_ALPHA_PERCENT;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -258,7 +260,7 @@ public class RateCallLayout extends FrameLayout {
             messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
             messageTextView.setText("Please rate the quality of this call.");
 
-            lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+            lightBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * LIGHT_BG_ALPHA_PERCENT)));
             darkBgDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(28), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
             isDarkBg = false;
 

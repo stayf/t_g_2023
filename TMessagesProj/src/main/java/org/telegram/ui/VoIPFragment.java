@@ -118,6 +118,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int STATE_GONE = 0;
     private final static int STATE_FULLSCREEN = 1;
     private final static int STATE_FLOATING = 2;
+    public final static float LIGHT_BG_ALPHA_PERCENT = 0.08f;
 
     private final int currentAccount;
 
@@ -169,9 +170,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     Paint overlayPaint = new Paint();
     Paint overlayBottomPaint = new Paint();
 
-    private final Drawable lightBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+    private final Drawable lightBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * LIGHT_BG_ALPHA_PERCENT)));
     private final Drawable darkBgEmojiHideDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(16), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
-    private final Drawable lightBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.12f)));
+    private final Drawable lightBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * LIGHT_BG_ALPHA_PERCENT)));
     private final Drawable darkBgEmojiDescDrawable = Theme.createRoundRectDrawable(AndroidUtilities.dp(20), ColorUtils.setAlphaComponent(Color.BLACK, (int) (255 * 0.4f)));
     private boolean isDarkBg = false;
 
@@ -1073,6 +1074,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         speakerPhoneIcon.setBackground(Theme.createSelectorDrawable(ColorUtils.setAlphaComponent(Color.WHITE, (int) (255 * 0.3f))));
         speakerPhoneIcon.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12));
         frameLayout.addView(speakerPhoneIcon, LayoutHelper.createFrame(56, 56, Gravity.TOP | Gravity.RIGHT));
+        speakerPhoneIcon.setAlpha(0f);
         speakerPhoneIcon.setOnClickListener(view -> {
             if (speakerPhoneIcon.getTag() == null) {
                 return;
@@ -1765,6 +1767,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     if (previewDialog != null) {
                         previewDialog.dismiss(false, false);
                     }
+                    notificationsLayout.animate().alpha(0f).setDuration(250).start();
                 } else {
                     AndroidUtilities.runOnUIThread(() -> windowView.finish(), 200);
                 }
