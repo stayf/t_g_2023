@@ -44,6 +44,7 @@ public class VoIpGradientLayout extends FrameLayout {
     private final AnimatorSet defaultAnimatorSet;
     private GradientState state;
     private boolean isPaused = false;
+    public boolean blockDrawable = false;
 
     public VoIpGradientLayout(@NonNull Context context) {
         super(context);
@@ -217,6 +218,7 @@ public class VoIpGradientLayout extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (blockDrawable) return;
         float halfWidth = getWidth() / 2f;
         float halfHeight = getHeight() / 2f;
         canvas.save();

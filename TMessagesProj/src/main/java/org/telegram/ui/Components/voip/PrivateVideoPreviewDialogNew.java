@@ -283,6 +283,12 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             openTranslationY = startLocationYWithOffset - (startLocationYWithOffset * openProgress1);
             invalidate();
         });
+        openAnimator1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                afterOpened();
+            }
+        });
         ValueAnimator openAnimator2 = ValueAnimator.ofFloat(0f, 1f);
         openAnimator2.addUpdateListener(animation -> {
             openProgress2 = (float) animation.getAnimatedValue();
@@ -474,6 +480,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         if (isDismissed) {
             return;
         }
+        beforeClosed();
         isDismissed = true;
         saveLastCameraBitmap();
         onDismiss(screencast, apply);
@@ -639,6 +646,14 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
 
     protected boolean isHasVideoOnMainScreen() {
         return false;
+    }
+
+    protected void afterOpened() {
+
+    }
+
+    protected void beforeClosed() {
+
     }
 
     @Override

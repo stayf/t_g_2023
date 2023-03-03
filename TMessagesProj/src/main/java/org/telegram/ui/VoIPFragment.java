@@ -1741,6 +1741,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     callingUserMiniFloatingLayout.setVisibility(View.GONE);
                     currentUserCameraFloatingLayout.setAlpha(0f);
                     currentUserCameraFloatingLayout.setVisibility(View.GONE);
+                    if (previewDialog != null) {
+                        previewDialog.dismiss(false, false);
+                    }
                 } else {
                     AndroidUtilities.runOnUIThread(() -> windowView.finish(), 200);
                 }
@@ -2660,6 +2663,18 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                                 }
                                 previousState = currentState;
                                 updateViewState();
+                            }
+
+                            @Override
+                            protected void afterOpened() {
+                                callingUserPhotoView.blockDrawable = true;
+                                invalidate();
+                            }
+
+                            @Override
+                            protected void beforeClosed() {
+                                callingUserPhotoView.blockDrawable = false;
+                                invalidate();
                             }
 
                             @Override
