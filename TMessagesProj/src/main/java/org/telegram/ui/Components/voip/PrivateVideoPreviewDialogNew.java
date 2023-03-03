@@ -135,13 +135,13 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
                         color2 = 0xff56C7FE;
                         color3 = 0;
                     } else if (a == 1) {
-                        color1 = 0xff57A4FE;
-                        color2 = 0xff766EE9;
-                        color3 = 0;
+                        color1 = 0xff227df4;
+                        color2 = 0xff1792ed;
+                        color3 = 0xff0a9ee8;
                     } else {
-                        color1 = 0xff766EE9;
-                        color2 = 0xffF05459;
-                        color3 = 0xffE4A756;
+                        color1 = 0xff1ab87f;
+                        color2 = 0xff3dc069;
+                        color3 = 0xff55c958;
                     }
                     Shader gradient;
                     if (color3 != 0) {
@@ -157,7 +157,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             protected void onDraw(Canvas canvas) {
                 AndroidUtilities.rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
                 gradientPaint[strangeCurrentPage].setAlpha(255);
-                int round = AndroidUtilities.dp(6) + (int) ((AndroidUtilities.dp(26) - AndroidUtilities.dp(6)) * (1f - openProgress1));
+                int round = AndroidUtilities.dp(8) + (int) ((AndroidUtilities.dp(26) - AndroidUtilities.dp(8)) * (1f - openProgress1));
                 canvas.drawRoundRect(AndroidUtilities.rectTmp, round, round, gradientPaint[strangeCurrentPage]);
                 if (pageOffset > 0 && strangeCurrentPage + 1 < gradientPaint.length) {
                     gradientPaint[strangeCurrentPage + 1].setAlpha((int) (255 * pageOffset));
@@ -178,7 +178,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         positiveButton.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            positiveButton.setForeground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(6), Color.TRANSPARENT, ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_voipgroup_nameText), (int) (255 * 0.3f))));
+            positiveButton.setForeground(Theme.createSimpleSelectorRoundRectDrawable(AndroidUtilities.dp(8), Color.TRANSPARENT, ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_voipgroup_nameText), (int) (255 * 0.3f))));
         }
         positiveButton.setPadding(0, AndroidUtilities.dp(12), 0, AndroidUtilities.dp(12));
         positiveButton.setOnClickListener(view -> {
@@ -193,7 +193,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             }
         });
 
-        addView(positiveButton, LayoutHelper.createFrame(52, 48, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 64));
+        addView(positiveButton, LayoutHelper.createFrame(52, 52, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 80));
 
         titlesLayout = new LinearLayout(context) {
             @Override
@@ -208,7 +208,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             titles[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             titles[i].setTextColor(0xffffffff);
             titles[i].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-            titles[i].setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
+            titles[i].setPadding(AndroidUtilities.dp(12), 0, AndroidUtilities.dp(10), 0);
             titles[i].setGravity(Gravity.CENTER_VERTICAL);
             titles[i].setSingleLine(true);
             titlesLayout.addView(titles[i], LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT));
@@ -275,7 +275,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         titlesLayout.setScaleY(0.8f);
         titlesLayout.setScaleX(0.8f);
         titlesLayout.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(150).setDuration(250).start();
-        positiveButton.setTranslationY(AndroidUtilities.dp(34));
+        positiveButton.setTranslationY(AndroidUtilities.dp(53));
         positiveButton.setTranslationX(startLocationX - (AndroidUtilities.displaySize.x / 2f) + AndroidUtilities.dp(8) + AndroidUtilities.dp(26));
         positiveButton.animate().translationY(0).translationX(0).setDuration(openAnimationTime).start();
         AndroidUtilities.runOnUIThread(() -> positiveButton.setText(LocaleController.getString("VoipShareVideo", R.string.VoipShareVideo)), (long) (openAnimationTime / 4.5f));
@@ -489,7 +489,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
 
     public void setBottomPadding(int padding) {
         LayoutParams layoutParams = (LayoutParams) positiveButton.getLayoutParams();
-        layoutParams.bottomMargin = AndroidUtilities.dp(64) + padding;
+        layoutParams.bottomMargin = AndroidUtilities.dp(80) + padding;
 
         layoutParams = (LayoutParams) titlesLayout.getLayoutParams();
         layoutParams.bottomMargin = padding;
