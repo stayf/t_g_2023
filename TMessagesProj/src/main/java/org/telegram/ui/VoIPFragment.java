@@ -92,6 +92,7 @@ import org.telegram.ui.Components.voip.AcceptDeclineView;
 import org.telegram.ui.Components.voip.BackupImageWithWavesView;
 import org.telegram.ui.Components.voip.EndCloseLayout;
 import org.telegram.ui.Components.voip.PrivateVideoPreviewDialog;
+import org.telegram.ui.Components.voip.PrivateVideoPreviewDialogNew;
 import org.telegram.ui.Components.voip.RateCallLayout;
 import org.telegram.ui.Components.voip.VoIPButtonsLayout;
 import org.telegram.ui.Components.voip.VoIPFloatingLayout;
@@ -178,7 +179,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     boolean callingUserIsVideo;
     boolean currentUserIsVideo;
 
-    private PrivateVideoPreviewDialog previewDialog;
+    private PrivateVideoPreviewDialogNew previewDialog;
 
     private int currentState;
     private int previousState;
@@ -241,7 +242,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     };
 
     Runnable stopAnimatingBgRunnable = () -> {
-        if(currentState == VoIPService.STATE_ESTABLISHED) {
+        if (currentState == VoIPService.STATE_ESTABLISHED) {
             callingUserPhotoViewMini.setMute(true, false);
             callingUserPhotoView.pause();
         }
@@ -591,7 +592,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     callingUserPhotoViewMini.setMute(false, false);
                     callingUserPhotoView.resume();
                     AndroidUtilities.cancelRunOnUIThread(stopAnimatingBgRunnable);
-                    if(currentState == VoIPService.STATE_ESTABLISHED) {
+                    if (currentState == VoIPService.STATE_ESTABLISHED) {
                         AndroidUtilities.runOnUIThread(stopAnimatingBgRunnable, 10000);
                     }
                 }
@@ -604,7 +605,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     callingUserPhotoViewMini.setMute(false, false);
                     callingUserPhotoView.resume();
                     AndroidUtilities.cancelRunOnUIThread(stopAnimatingBgRunnable);
-                    if(currentState == VoIPService.STATE_ESTABLISHED) {
+                    if (currentState == VoIPService.STATE_ESTABLISHED) {
                         AndroidUtilities.runOnUIThread(stopAnimatingBgRunnable, 10000);
                     }
                 }
@@ -2061,7 +2062,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             }
         }
         AndroidUtilities.cancelRunOnUIThread(stopAnimatingBgRunnable);
-        if(currentState == VoIPService.STATE_ESTABLISHED) {
+        if (currentState == VoIPService.STATE_ESTABLISHED) {
             AndroidUtilities.runOnUIThread(stopAnimatingBgRunnable, 10000);
         }
     }
@@ -2638,7 +2639,9 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                             service.switchCamera();
                         }
                         windowView.setLockOnScreen(true);
-                        previewDialog = new PrivateVideoPreviewDialog(fragmentView.getContext(), false, true) {
+                        int[] locVideoButton = new int[2];
+                        bottomVideoBtn.getLocationOnScreen(locVideoButton);
+                        previewDialog = new PrivateVideoPreviewDialogNew(fragmentView.getContext(), false, true, locVideoButton[0], locVideoButton[1]) {
                             @Override
                             public void onDismiss(boolean screencast, boolean apply) {
                                 previewDialog = null;
@@ -2657,6 +2660,22 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                                 }
                                 previousState = currentState;
                                 updateViewState();
+                            }
+
+                            @Override
+                            protected int[] getFloatingViewLocation() {
+                                int[] loc = new int[2];
+                                int[] result = new int[3];
+                                currentUserCameraFloatingLayout.getLocationOnScreen(loc);
+                                result[0] = loc[0];
+                                result[1] = loc[1];
+                                result[2] = currentUserCameraFloatingLayout.getMeasuredWidth();
+                                return result;
+                            }
+
+                            @Override
+                            protected boolean isHasVideoOnMainScreen() {
+                                return callingUserIsVideo;
                             }
                         };
                         if (lastInsets != null) {
