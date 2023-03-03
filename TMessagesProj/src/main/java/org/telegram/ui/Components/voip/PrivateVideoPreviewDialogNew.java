@@ -9,9 +9,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Shader;
@@ -62,8 +64,6 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
     private boolean cameraReady;
     private ActionBar actionBar;
 
-    public boolean micEnabled;
-
     private float pageOffset;
     private int strangeCurrentPage;
     private int realCurrentPage;
@@ -76,6 +76,8 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
     private final float startLocationX;
     private final float startLocationY;
     private final Path clipPath = new Path();
+    private final Camera camera = new Camera();
+    private final Matrix matrix = new Matrix();
 
     public PrivateVideoPreviewDialogNew(Context context, boolean mic, boolean screencast, float startLocationX, float startLocationY) {
         super(context);
@@ -198,17 +200,42 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         titlesLayout = new LinearLayout(context) {
             @Override
             protected void dispatchDraw(Canvas canvas) {
+                int halfWidth = getWidth() / 2;
+                int halfHeight = getHeight() / 2;
+
+                camera.save();
+                camera.rotateY(8);
+                camera.getMatrix(matrix);
+                camera.restore();
+                matrix.preTranslate(-halfWidth, -halfHeight);
+                matrix.postTranslate(halfWidth, halfHeight);
+                canvas.save();
+                canvas.clipRect(halfWidth, 0, getWidth(), getHeight());
+                canvas.concat(matrix);
                 super.dispatchDraw(canvas);
+                canvas.restore();
+
+                camera.save();
+                camera.rotateY(-8);
+                camera.getMatrix(matrix);
+                camera.restore();
+                matrix.preTranslate(-halfWidth, -halfHeight);
+                matrix.postTranslate(halfWidth, halfHeight);
+                canvas.save();
+                canvas.clipRect(0, 0, halfWidth, getHeight());
+                canvas.concat(matrix);
+                super.dispatchDraw(canvas);
+                canvas.restore();
             }
         };
-        addView(titlesLayout, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 64, Gravity.BOTTOM));
+        addView(titlesLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 64, Gravity.BOTTOM));
 
         for (int i = 0; i < titles.length; i++) {
             titles[i] = new TextView(context);
-            titles[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+            titles[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             titles[i].setTextColor(0xffffffff);
             titles[i].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-            titles[i].setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(10), 0);
+            titles[i].setPadding(AndroidUtilities.dp(17), 0, AndroidUtilities.dp(10), 0);
             titles[i].setGravity(Gravity.CENTER_VERTICAL);
             titles[i].setSingleLine(true);
             titlesLayout.addView(titles[i], LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT));
@@ -499,7 +526,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
     private void updateTitlesLayout() {
         View current = titles[strangeCurrentPage];
         View next = strangeCurrentPage < titles.length - 1 ? titles[strangeCurrentPage + 1] : null;
-        float cx = getMeasuredWidth() / 2;
+
         float currentCx = current.getLeft() + current.getMeasuredWidth() / 2;
         float tx = getMeasuredWidth() / 2 - currentCx;
         if (next != null) {
@@ -523,8 +550,8 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             titles[i].setAlpha(alpha);
             titles[i].setScaleX(scale);
             titles[i].setScaleY(scale);
+            titles[i].setTranslationX(tx);
         }
-        titlesLayout.setTranslationX(tx);
         positiveButton.invalidate();
         if (realCurrentPage == 0) {
             titles[2].setAlpha(0.7f * pageOffset);
@@ -612,27 +639,6 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
 
     protected boolean isHasVideoOnMainScreen() {
         return false;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        boolean isLandscape = MeasureSpec.getSize(widthMeasureSpec) > MeasureSpec.getSize(heightMeasureSpec);
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) positiveButton.getLayoutParams();
-        if (isLandscape) {
-            marginLayoutParams.rightMargin = marginLayoutParams.leftMargin = AndroidUtilities.dp(80);
-        } else {
-            marginLayoutParams.rightMargin = marginLayoutParams.leftMargin = AndroidUtilities.dp(16);
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureChildWithMargins(titlesLayout, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 0, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64), MeasureSpec.EXACTLY), 0);
-    }
-
-    @Override
-    public void invalidate() {
-        super.invalidate();
-        if (getParent() != null) {
-            ((View) getParent()).invalidate();
-        }
     }
 
     @Override
