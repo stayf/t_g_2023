@@ -208,7 +208,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             titles[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
             titles[i].setTextColor(0xffffffff);
             titles[i].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-            titles[i].setPadding(AndroidUtilities.dp(12), 0, AndroidUtilities.dp(10), 0);
+            titles[i].setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(10), 0);
             titles[i].setGravity(Gravity.CENTER_VERTICAL);
             titles[i].setSingleLine(true);
             titlesLayout.addView(titles[i], LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT));
@@ -263,7 +263,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             positiveButton.getLayoutParams().width = AndroidUtilities.dp(52) + (int) (w * openProgress2);
             positiveButton.requestLayout();
         });
-        int openAnimationTime = 400;
+        int openAnimationTime = 450; //450
         openAnimator1.setInterpolator(CubicBezierInterpolator.DEFAULT);
         openAnimator1.setDuration(openAnimationTime);
         openAnimator1.start();
@@ -274,7 +274,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         titlesLayout.setAlpha(0f);
         titlesLayout.setScaleY(0.8f);
         titlesLayout.setScaleX(0.8f);
-        titlesLayout.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(150).setDuration(250).start();
+        titlesLayout.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(200).setDuration(250).start(); //200 250
         positiveButton.setTranslationY(AndroidUtilities.dp(53));
         positiveButton.setTranslationX(startLocationX - (AndroidUtilities.displaySize.x / 2f) + AndroidUtilities.dp(8) + AndroidUtilities.dp(26));
         positiveButton.animate().translationY(0).translationX(0).setDuration(openAnimationTime).start();
@@ -367,7 +367,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
                 }
             });
             animator.setInterpolator(CubicBezierInterpolator.DEFAULT);
-            animator.setDuration(400);
+            animator.setDuration(400);//400
             animator.start();
         } else {
             //всегда будет 1
@@ -457,8 +457,8 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
                 invalidate();
             });
             closeAnimator.setInterpolator(CubicBezierInterpolator.DEFAULT);
-            closeAnimator.setStartDelay(100);
-            closeAnimator.setDuration(400);
+            closeAnimator.setStartDelay(60);
+            closeAnimator.setDuration(350); //350
             closeAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -469,11 +469,12 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
                 }
             });
             closeAnimator.start();
-            positiveButton.animate().setStartDelay(100).alpha(0f).setDuration(100).start();
-            actionBar.animate().setStartDelay(100).alpha(0f).setDuration(100).start();
-            titlesLayout.animate().setStartDelay(100).alpha(0f).setDuration(100).start();
+            positiveButton.animate().setStartDelay(60).alpha(0f).setDuration(100).start(); //100
+            actionBar.animate().setStartDelay(60).alpha(0f).setDuration(100).start(); //100
+            titlesLayout.animate().setStartDelay(60).alpha(0f).setDuration(100).start(); //100
         } else {
-            animate().setStartDelay(100).alpha(0f).setDuration(250).setListener(new AnimatorListenerAdapter() {
+            //350
+            animate().setStartDelay(60).alpha(0f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
@@ -586,7 +587,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
     public void onCameraFirstFrameAvailable() {
         if (!cameraReady) {
             cameraReady = true;
-            textureView.animate().alpha(1f).setDuration(250).start();
+            if (realCurrentPage != 0) textureView.animate().alpha(1f).setDuration(250).start();
         }
     }
 
