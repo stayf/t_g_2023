@@ -44,7 +44,7 @@ public class VoIpGradientLayout extends FrameLayout {
     private final AnimatorSet defaultAnimatorSet;
     private GradientState state;
     private boolean isPaused = false;
-    public boolean blockDrawable = false;
+    public volatile boolean blockDrawable = false;
 
     public VoIpGradientLayout(@NonNull Context context) {
         super(context);

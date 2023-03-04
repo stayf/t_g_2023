@@ -238,7 +238,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             titles[i].setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             titles[i].setTextColor(0xffffffff);
             titles[i].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-            titles[i].setPadding(AndroidUtilities.dp(17), 0, AndroidUtilities.dp(10), 0);
+            titles[i].setPadding(AndroidUtilities.dp(16), 0, AndroidUtilities.dp(10), 0);
             titles[i].setGravity(Gravity.CENTER_VERTICAL);
             titles[i].setSingleLine(true);
             titlesLayout.addView(titles[i], LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT));
@@ -314,7 +314,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         positiveButton.setTranslationY(AndroidUtilities.dp(53));
         positiveButton.setTranslationX(startLocationX - (AndroidUtilities.displaySize.x / 2f) + AndroidUtilities.dp(8) + AndroidUtilities.dp(26));
         positiveButton.animate().translationY(0).translationX(0).setDuration(openAnimationTime).start();
-        AndroidUtilities.runOnUIThread(() -> positiveButton.setText(LocaleController.getString("VoipShareVideo", R.string.VoipShareVideo)), (long) (openAnimationTime / 4.5f));
+        AndroidUtilities.runOnUIThread(() -> positiveButton.setText("Share Video"), (long) (openAnimationTime / 4.5f));
     }
 
     private void showStub(boolean show, boolean animate) {
@@ -668,6 +668,12 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
 
     protected void beforeClosed() {
 
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        measureChildWithMargins(titlesLayout, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 0, MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(64), MeasureSpec.EXACTLY), 0);
     }
 
     @Override

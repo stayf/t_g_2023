@@ -2693,13 +2693,13 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                             @Override
                             protected void afterOpened() {
                                 callingUserPhotoView.blockDrawable = true;
-                                invalidate();
+                                callingUserPhotoView.invalidate();
                             }
 
                             @Override
                             protected void beforeClosed() {
                                 callingUserPhotoView.blockDrawable = false;
-                                invalidate();
+                                callingUserPhotoView.invalidate();
                             }
 
                             @Override
