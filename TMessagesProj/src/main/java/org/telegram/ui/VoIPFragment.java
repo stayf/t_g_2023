@@ -445,6 +445,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         ((FrameLayout.LayoutParams) rateCallLayout.getLayoutParams()).topMargin = AndroidUtilities.dp(380) + lastInsets.getSystemWindowInsetTop();
         ((FrameLayout.LayoutParams) callingUserMiniFloatingLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
         ((FrameLayout.LayoutParams) notificationsLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
+        ((FrameLayout.LayoutParams) encryptionTooltip.getLayoutParams()).topMargin = AndroidUtilities.dp(12) + lastInsets.getSystemWindowInsetTop();
         //((FrameLayout.LayoutParams) currentUserCameraFloatingLayout.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
         //((FrameLayout.LayoutParams) callingUserTextureView.getLayoutParams()).bottomMargin = lastInsets.getSystemWindowInsetBottom();
         //((FrameLayout.LayoutParams) topShadow.getLayoutParams()).topMargin = lastInsets.getSystemWindowInsetTop();
@@ -1126,7 +1127,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
 
         encryptionTooltip = new HintView(context, 20, true, null);
         encryptionTooltip.setText("Encryption key of this call");
-        frameLayout.addView(encryptionTooltip, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 44, 0, 0));
+        frameLayout.addView(encryptionTooltip, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 0, 12, 0, 0));
         encryptionTooltip.setVisibility(View.GONE);
 
         updateViewState();

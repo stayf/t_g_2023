@@ -102,7 +102,7 @@ public class HintView extends FrameLayout {
             textView.setMaxWidth(AndroidUtilities.dp(250));
         }
         if (currentType == 20) {
-            textView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+            textView.setGravity(Gravity.CENTER);
             textView.setBackground(lightBgDrawable);
             textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
             addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 30, Gravity.LEFT | Gravity.TOP, 0, topArrow ? 6 : 0, 0, topArrow ? 0 : 6));
@@ -479,6 +479,9 @@ public class HintView extends FrameLayout {
                 setTranslationX(getTranslationX() + diff);
                 arrowImageView.setTranslationX(arrowX - diff);
             }
+        }
+        if (currentType == 20) {
+            arrowImageView.setTranslationX((getMeasuredWidth() / 2f) - (arrowImageView.getMeasuredWidth() / 2f));
         }
     }
 
