@@ -67,6 +67,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
     private float pageOffset;
     private int strangeCurrentPage;
     private int realCurrentPage;
+    private int previousPage = -1;
 
     private float openProgress1 = 0f;
     private float openProgress2 = 0f;
@@ -77,7 +78,8 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
     private final float startLocationY;
     private final Path clipPath = new Path();
     private final Camera camera = new Camera();
-    private final Matrix matrix = new Matrix();
+    private final Matrix matrixRight = new Matrix();
+    private final Matrix matrixLeft = new Matrix();
 
     public PrivateVideoPreviewDialogNew(Context context, boolean mic, boolean screencast, float startLocationX, float startLocationY) {
         super(context);
@@ -198,32 +200,33 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         addView(positiveButton, LayoutHelper.createFrame(52, 52, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0, 0, 80));
 
         titlesLayout = new LinearLayout(context) {
+
             @Override
             protected void dispatchDraw(Canvas canvas) {
                 int halfWidth = getWidth() / 2;
                 int halfHeight = getHeight() / 2;
 
                 camera.save();
-                camera.rotateY(8);
-                camera.getMatrix(matrix);
+                camera.rotateY(7);
+                camera.getMatrix(matrixRight);
                 camera.restore();
-                matrix.preTranslate(-halfWidth, -halfHeight);
-                matrix.postTranslate(halfWidth, halfHeight);
+                matrixRight.preTranslate(-halfWidth, -halfHeight);
+                matrixRight.postTranslate(halfWidth, halfHeight);
                 canvas.save();
                 canvas.clipRect(halfWidth, 0, getWidth(), getHeight());
-                canvas.concat(matrix);
+                canvas.concat(matrixRight);
                 super.dispatchDraw(canvas);
                 canvas.restore();
 
                 camera.save();
-                camera.rotateY(-8);
-                camera.getMatrix(matrix);
+                camera.rotateY(-7);
+                camera.getMatrix(matrixLeft);
                 camera.restore();
-                matrix.preTranslate(-halfWidth, -halfHeight);
-                matrix.postTranslate(halfWidth, halfHeight);
+                matrixLeft.preTranslate(-halfWidth, -halfHeight);
+                matrixLeft.postTranslate(halfWidth, halfHeight);
                 canvas.save();
                 canvas.clipRect(0, 0, halfWidth, getHeight());
-                canvas.concat(matrix);
+                canvas.concat(matrixLeft);
                 super.dispatchDraw(canvas);
                 canvas.restore();
             }
@@ -376,13 +379,15 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             }
 
             ValueAnimator animator;
-            if (position > strangeCurrentPage) {
+            if (position > realCurrentPage) {
                 //на право
-                realCurrentPage = strangeCurrentPage + 1;
+                previousPage = realCurrentPage;
+                realCurrentPage = realCurrentPage + 1;
                 animator = ValueAnimator.ofFloat(0.1f, 1f);
             } else {
                 //на лево
-                realCurrentPage = strangeCurrentPage - 1;
+                previousPage = realCurrentPage;
+                realCurrentPage = realCurrentPage - 1;
                 strangeCurrentPage = position;
                 animator = ValueAnimator.ofFloat(1f, 0f);
             }
@@ -394,13 +399,14 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    previousPage = -1;
                     strangeCurrentPage = position;
                     pageOffset = 0;
                     updateTitlesLayout();
                 }
             });
             animator.setInterpolator(CubicBezierInterpolator.DEFAULT);
-            animator.setDuration(400);//400
+            animator.setDuration(350);//400
             animator.start();
         } else {
             //всегда будет 1
@@ -568,6 +574,14 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
                 titles[0].setAlpha(0.7f * (1f - pageOffset));
             } else {
                 titles[0].setAlpha(0f);
+            }
+        }
+        if (realCurrentPage == 1) {
+            if (previousPage == 0) {
+                titles[2].setAlpha(0.7f * pageOffset);
+            }
+            if (previousPage == 2) {
+                titles[0].setAlpha(0.7f * (1f - pageOffset));
             }
         }
     }
