@@ -56,14 +56,14 @@ public class VoIpSwitchLayout extends FrameLayout {
         currentTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
         currentTextView.setTextColor(Color.WHITE);
         currentTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(currentTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 6, 0, 0));
+        addView(currentTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 6, 0, 2));
 
         newTextView = new TextView(context);
         newTextView.setGravity(Gravity.CENTER_HORIZONTAL);
         newTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
         newTextView.setTextColor(Color.WHITE);
         newTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(newTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 6, 0, 0));
+        addView(newTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 6, 0, 2));
         currentTextView.setVisibility(GONE);
         newTextView.setVisibility(GONE);
     }
@@ -109,7 +109,7 @@ public class VoIpSwitchLayout extends FrameLayout {
             return;
         }
 
-        currentTextView.animate().alpha(0f).translationY(-AndroidUtilities.dp(4)).setDuration(150).setListener(new AnimatorListenerAdapter() {
+        currentTextView.animate().alpha(0f).translationY(-AndroidUtilities.dp(4)).setDuration(140).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 currentTextView.setText(newText);
@@ -120,7 +120,7 @@ public class VoIpSwitchLayout extends FrameLayout {
         newTextView.setText(newText);
         newTextView.setVisibility(VISIBLE);
         newTextView.setAlpha(0);
-        newTextView.setTranslationY(AndroidUtilities.dp(8));
+        newTextView.setTranslationY(AndroidUtilities.dp(5));
         newTextView.animate().alpha(1.0f).translationY(0).setDuration(150).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
