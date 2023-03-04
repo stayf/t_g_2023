@@ -1470,7 +1470,9 @@ public class BottomSheet extends Dialog {
         if (dismissed) {
             return;
         }
+        int duration = 180;
         if (beforeCloseListener != null) {
+            duration = 330;
             beforeCloseListener.onClick(BottomSheet.this, item);
         }
         dismissed = true;
@@ -1481,7 +1483,7 @@ public class BottomSheet extends Dialog {
                 ObjectAnimator.ofFloat(containerView, View.TRANSLATION_Y, getContainerViewHeight() + container.keyboardHeight + AndroidUtilities.dp(10) + (scrollNavBar ? getBottomInset() : 0)),
                 ObjectAnimator.ofInt(backDrawable, AnimationProperties.COLOR_DRAWABLE_ALPHA, 0)
         );
-        currentSheetAnimation.setDuration(180);
+        currentSheetAnimation.setDuration(duration);
         currentSheetAnimation.setInterpolator(CubicBezierInterpolator.EASE_OUT);
         currentSheetAnimation.addListener(new AnimatorListenerAdapter() {
             @Override

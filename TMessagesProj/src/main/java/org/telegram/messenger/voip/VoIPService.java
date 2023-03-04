@@ -2713,7 +2713,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 					//отключаем рипл эффект при нажатии. На видео его нет.
 					bottomSheet.getItemViews().get(i).setBackgroundDrawable(null);
 				}
-				bottomSheet.setItemColor(selectedPos, Color.BLUE, Color.BLUE);
+				bottomSheet.setItemColor(selectedPos, 0xff0787ea, 0xff0787ea);
 				bottomSheet.setBeforeCloseListener((dialog, which) -> {
 					if (selectedPos != which) {
 						int color1 = bottomSheet.getItemViews().get(selectedPos).getTextView().getCurrentTextColor();
@@ -2723,7 +2723,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 							int color = (int) a.getAnimatedValue();
 							bottomSheet.setItemColor(selectedPos, color, color);
 						});
-						animator.setDuration(60);
+						animator.setDuration(130);
 						animator.setInterpolator(CubicBezierInterpolator.DEFAULT);
 						animator.start();
 						ValueAnimator animator2 = ValueAnimator.ofArgb(color2, color1);
@@ -2731,7 +2731,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 							int color = (int) a.getAnimatedValue();
 							bottomSheet.setItemColor(which, color, color);
 						});
-						animator2.setDuration(60);
+						animator2.setDuration(130);
 						animator2.setInterpolator(CubicBezierInterpolator.DEFAULT);
 						animator2.start();
 					}
