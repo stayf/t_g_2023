@@ -149,6 +149,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     TextView hideEmojiTextView;
     RateCallLayout rateCallLayout;
     LinearLayout emojiRationalLayout;
+    TextView emojiRationalTopTextView;
+    TextView emojiRationalTextView;
     EndCloseLayout endCloseLayout;
     BackupImageView[] emojiViews = new BackupImageView[4];
     Emoji.EmojiDrawable[] emojiDrawables = new Emoji.EmojiDrawable[4];
@@ -877,14 +879,14 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
         emojiRationalLayout = new LinearLayout(context);
         emojiRationalLayout.setOrientation(LinearLayout.VERTICAL);
 
-        TextView emojiRationalTopTextView = new TextView(context);
+        emojiRationalTopTextView = new TextView(context);
         emojiRationalTopTextView.setText("This call is end to end encrypted");
         emojiRationalTopTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         emojiRationalTopTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
         emojiRationalTopTextView.setTextColor(Color.WHITE);
         emojiRationalTopTextView.setGravity(Gravity.CENTER);
 
-        TextView emojiRationalTextView = new TextView(context);
+        emojiRationalTextView = new TextView(context);
         emojiRationalTextView.setText(LocaleController.formatString("CallEmojiKeyTooltip", R.string.CallEmojiKeyTooltip, UserObject.getFirstName(callingUser)));
         emojiRationalTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         emojiRationalTextView.setTextColor(Color.WHITE);
@@ -1634,7 +1636,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                     }
                     emojiRationalLayout.setVisibility(View.GONE);
                 }
-            }).setDuration(500).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+            }).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         }
         updateViewState(); //двигает/скрывает строку со статусом
     }
