@@ -2473,7 +2473,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             setVideoAction(bottomVideoBtn, service, animated);
             setMicrohoneAction(bottomMuteBtn, service, animated);
 
-            bottomEndCallBtn.setData(R.drawable.calls_decline, Color.WHITE, 0xFFF01D2C, LocaleController.getString("VoipEndCall", R.string.VoipEndCall), false, animated);
+            bottomEndCallBtn.setData(R.drawable.calls_decline, Color.WHITE, 0xFFF01D2C, "End Call", false, animated);
             bottomEndCallBtn.setOnClickListener(view -> {
                 if (VoIPService.getSharedInstance() != null) {
                     AndroidUtilities.cancelRunOnUIThread(hideUIRunnable);
