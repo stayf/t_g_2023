@@ -69,7 +69,7 @@ public class VoIpGradientLayout extends FrameLayout {
         });
         rotationAnimator.setRepeatCount(ValueAnimator.INFINITE);
         rotationAnimator.setRepeatMode(ValueAnimator.RESTART);
-        ValueAnimator scaleAnimator = ValueAnimator.ofFloat(1.05f, 1.5f, 1.5f, 1.05f, 1.5f, 1.5f, 1.05f);
+        ValueAnimator scaleAnimator = ValueAnimator.ofFloat(1.1f, 1.6f, 1.6f, 1.1f, 1.6f, 1.6f, 1.1f);
         scaleAnimator.addUpdateListener(animation -> {
             scale = (float) animation.getAnimatedValue();
         });

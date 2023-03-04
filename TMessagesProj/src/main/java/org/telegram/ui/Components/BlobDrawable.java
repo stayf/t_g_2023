@@ -109,6 +109,67 @@ public class BlobDrawable {
         }
     }
 
+    public void updateNoLiteMode(float amplitude, float speedScale, float muteToStaticProgress) {
+        for (int i = 0; i < N; i++) {
+            progress[i] += (speed[i] * MIN_SPEED) + amplitude * speed[i] * MAX_SPEED * speedScale;
+            if (progress[i] >= 1f) {
+                progress[i] = 0;
+                radius[i] = radiusNext[i];
+                angle[i] = angleNext[i];
+                generateBlob(radiusNext, angleNext, i, muteToStaticProgress);
+            }
+        }
+    }
+
+    public void drawNoLiteMode(float cX, float cY, Canvas canvas, Paint paint) {
+        path.reset();
+
+        for (int i = 0; i < N; i++) {
+            float progress = this.progress[i];
+            int nextIndex = i + 1 < N ? i + 1 : 0;
+            float progressNext = this.progress[nextIndex];
+            float r1 = radius[i] * (1f - progress) + radiusNext[i] * progress;
+            float r2 = radius[nextIndex] * (1f - progressNext) + radiusNext[nextIndex] * progressNext;
+            float angle1 = angle[i] * (1f - progress) + angleNext[i] * progress;
+            float angle2 = angle[nextIndex] * (1f - progressNext) + angleNext[nextIndex] * progressNext;
+
+            float l = L * (Math.min(r1, r2) + (Math.max(r1, r2) - Math.min(r1, r2)) / 2f) * cubicBezierK;
+            m.reset();
+            m.setRotate(angle1, cX, cY);
+
+            pointStart[0] = cX;
+            pointStart[1] = cY - r1;
+            pointStart[2] = cX + l;
+            pointStart[3] = cY - r1;
+
+            m.mapPoints(pointStart);
+
+            pointEnd[0] = cX;
+            pointEnd[1] = cY - r2;
+            pointEnd[2] = cX - l;
+            pointEnd[3] = cY - r2;
+
+            m.reset();
+            m.setRotate(angle2, cX, cY);
+
+            m.mapPoints(pointEnd);
+
+            if (i == 0) {
+                path.moveTo(pointStart[0], pointStart[1]);
+            }
+
+            path.cubicTo(
+                    pointStart[2], pointStart[3],
+                    pointEnd[2], pointEnd[3],
+                    pointEnd[0], pointEnd[1]
+            );
+        }
+
+        canvas.save();
+        canvas.drawPath(path, paint);
+        canvas.restore();
+    }
+
     public void draw(float cX, float cY, Canvas canvas, Paint paint) {
         if (!LiteMode.isEnabled(LiteMode.FLAG_CALLS_ANIMATIONS)) {
             return;

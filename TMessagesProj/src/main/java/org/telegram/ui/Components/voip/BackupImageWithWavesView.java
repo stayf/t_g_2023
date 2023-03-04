@@ -173,9 +173,6 @@ public class BackupImageWithWavesView extends FrameLayout {
         }
 
         public void draw(Canvas canvas, float cx, float cy, View parentView) {
-            if (!LiteMode.isEnabled(LiteMode.FLAG_CALLS_ANIMATIONS)) {
-                return;
-            }
             float scaleBlob = 0.8f + 0.4f * amplitude;
             if (showWaves || wavesEnter != 0) {
                 canvas.save();
@@ -183,11 +180,11 @@ public class BackupImageWithWavesView extends FrameLayout {
 
                 canvas.scale(scaleBlob * wavesEnter, scaleBlob * wavesEnter, cx, cy);
 
-                blobDrawable.update(amplitude, 1f, muteToStaticProgress);
-                blobDrawable.draw(cx, cy, canvas, blobDrawable.paint);
+                blobDrawable.updateNoLiteMode(amplitude, 1f, muteToStaticProgress);
+                blobDrawable.drawNoLiteMode(cx, cy, canvas, blobDrawable.paint);
 
-                blobDrawable2.update(amplitude, 1f, muteToStaticProgress);
-                blobDrawable2.draw(cx, cy, canvas, blobDrawable.paint);
+                blobDrawable2.updateNoLiteMode(amplitude, 1f, muteToStaticProgress);
+                blobDrawable2.drawNoLiteMode(cx, cy, canvas, blobDrawable.paint);
                 canvas.restore();
             }
 
