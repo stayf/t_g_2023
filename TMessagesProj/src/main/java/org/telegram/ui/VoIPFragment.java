@@ -118,7 +118,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
     private final static int STATE_GONE = 0;
     private final static int STATE_FULLSCREEN = 1;
     private final static int STATE_FLOATING = 2;
-    public final static float LIGHT_BG_ALPHA_PERCENT = 0.08f;
+    public final static float LIGHT_BG_ALPHA_PERCENT = 0.10f;
 
     private final int currentAccount;
 
