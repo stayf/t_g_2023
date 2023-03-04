@@ -87,7 +87,7 @@ public class AcceptDeclineView extends View {
 
     public AcceptDeclineView(@NonNull Context context) {
         super(context);
-        avatarWavesDrawable = new BackupImageWithWavesView.AvatarWavesDrawable(AndroidUtilities.dp(45), AndroidUtilities.dp(50), AndroidUtilities.dp(8));
+        avatarWavesDrawable = new BackupImageWithWavesView.AvatarWavesDrawable(AndroidUtilities.dp(45), AndroidUtilities.dp(50), AndroidUtilities.dp(8), 4);
         avatarWavesDrawable.muteToStatic = true;
         avatarWavesDrawable.muteToStaticProgress = 0f;
         avatarWavesDrawable.wavesEnter = 0;

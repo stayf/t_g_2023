@@ -28,7 +28,7 @@ public class BackupImageWithWavesView extends FrameLayout {
 
     public BackupImageWithWavesView(Context context) {
         super(context);
-        avatarWavesDrawable = new AvatarWavesDrawable(AndroidUtilities.dp(105), AndroidUtilities.dp(110), AndroidUtilities.dp(12));
+        avatarWavesDrawable = new AvatarWavesDrawable(AndroidUtilities.dp(104), AndroidUtilities.dp(111), AndroidUtilities.dp(12), 8);
         avatarWavesDrawable.setAmplitude(3f);
         avatarWavesDrawable.setShowWaves(true, this);
         backupImageView = new BackupImageView(context);
@@ -130,9 +130,9 @@ public class BackupImageWithWavesView extends FrameLayout {
         public boolean muteToStatic = false;
         public float muteToStaticProgress = 1f;
 
-        public AvatarWavesDrawable(int minRadius, int maxRadius, int diff) {
-            blobDrawable = new BlobDrawable(3);
-            blobDrawable2 = new BlobDrawable(4);
+        public AvatarWavesDrawable(int minRadius, int maxRadius, int diff, int n) {
+            blobDrawable = new BlobDrawable(n - 1);
+            blobDrawable2 = new BlobDrawable(n);
             blobDrawable.minRadius = minRadius;
             blobDrawable.maxRadius = maxRadius;
             blobDrawable2.minRadius = minRadius - diff;
