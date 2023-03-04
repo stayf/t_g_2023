@@ -1407,7 +1407,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             topShadow.setAlpha(0f);
             speakerPhoneIcon.setAlpha(0f);
             notificationsLayout.setAlpha(0f);
-            callingUserPhotoView.setAlpha(0f);
+            //callingUserPhotoView.setAlpha(0f);
 
             currentUserCameraFloatingLayout.switchingToPip = true;
             AndroidUtilities.runOnUIThread(() -> {
@@ -1422,7 +1422,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 bottomShadow.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 topShadow.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
                 notificationsLayout.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
-                callingUserPhotoView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
+                //callingUserPhotoView.animate().alpha(1f).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
 
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -1507,11 +1507,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserTextureView.setTranslationY(callingUserToY);
             callingUserTextureView.setRoundCorners(AndroidUtilities.dp(6) * 1f / callingUserToScale);
 
-            callingUserPhotoView.setAlpha(0f);
+            /*callingUserPhotoView.setAlpha(0f);
             callingUserPhotoView.setScaleX(callingUserToScale);
             callingUserPhotoView.setScaleY(callingUserToScale);
             callingUserPhotoView.setTranslationX(callingUserToX);
-            callingUserPhotoView.setTranslationY(callingUserToY);
+            callingUserPhotoView.setTranslationY(callingUserToY);*/
         }
         ValueAnimator animator = ValueAnimator.ofFloat(enter ? 1f : 0, enter ? 0 : 1f);
 
@@ -1548,11 +1548,11 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 currentUserTextureView.setScreenshareMiniProgress(v, false);
             }
 
-            callingUserPhotoView.setScaleX(callingUserScale);
+            /*callingUserPhotoView.setScaleX(callingUserScale);
             callingUserPhotoView.setScaleY(callingUserScale);
             callingUserPhotoView.setTranslationX(tx);
             callingUserPhotoView.setTranslationY(ty);
-            callingUserPhotoView.setAlpha(1f - v);
+            callingUserPhotoView.setAlpha(1f - v);*/
         });
         return animator;
     }
@@ -1637,6 +1637,7 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
                 }
             }).setDuration(350).setInterpolator(CubicBezierInterpolator.DEFAULT).start();
         }
+        previousState = currentState;
         updateViewState(); //двигает/скрывает строку со статусом
     }
 
@@ -2268,6 +2269,8 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             callingUserPhotoViewMini.animate().setListener(null).cancel();
             callingUserPhotoViewMini.setTranslationY(0);
             callingUserPhotoViewMini.setAlpha(1f);
+            callingUserPhotoViewMini.setScaleX(1f);
+            callingUserPhotoViewMini.setScaleY(1f);
             callingUserPhotoViewMini.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         callingUserPhotoViewMini.setTag(show ? 1 : null);
