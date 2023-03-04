@@ -337,7 +337,7 @@ public class AcceptDeclineView extends View {
         declineDrawable.draw(canvas);
 
         canvas.save();
-        canvas.translate(buttonWidth / 2f - declineLayout.getWidth() / 2f, buttonWidth + AndroidUtilities.dp(2));
+        canvas.translate(buttonWidth / 2f - declineLayout.getWidth() / 2f, buttonWidth + AndroidUtilities.dp(4));
         declineLayout.draw(canvas);
         declineRect.set(getMeasuredWidth() - AndroidUtilities.dp(46) - buttonWidth, AndroidUtilities.dp(40), getMeasuredWidth() - AndroidUtilities.dp(46), AndroidUtilities.dp(40) + buttonWidth);
         canvas.restore();
@@ -413,7 +413,7 @@ public class AcceptDeclineView extends View {
             avatarWavesDrawable.setShowWaves(true, this);
             declineDrawable.setColor(0xFFF01D2C);
 
-            callAnimator = ValueAnimator.ofInt(0, 40, 0, 0, 40, 0, 0, 0, 0);
+            callAnimator = ValueAnimator.ofInt(0, 60, 0, 0, 60, 0, 0, 0, 0);
             callAnimator.addUpdateListener(a -> {
                 avatarWavesDrawable.setAmplitude((int) a.getAnimatedValue());
             });
