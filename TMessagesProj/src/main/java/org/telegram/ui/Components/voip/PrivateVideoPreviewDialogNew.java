@@ -286,7 +286,7 @@ public abstract class PrivateVideoPreviewDialogNew extends FrameLayout implement
         openAnimator1.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                afterOpened();
+                if (!isDismissed) afterOpened();
             }
         });
         ValueAnimator openAnimator2 = ValueAnimator.ofFloat(0f, 1f);
