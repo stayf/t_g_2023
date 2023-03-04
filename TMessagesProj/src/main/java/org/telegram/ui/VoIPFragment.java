@@ -1188,7 +1188,6 @@ public class VoIPFragment implements VoIPService.StateListener, NotificationCent
             lp.leftMargin = (int) diff;
             lp.rightMargin = (int) diff;
             acceptDeclineView.requestLayout();
-
         });
         final int totalDuration = 400; //взяли 400
         ObjectAnimator scaleXAnimator = ObjectAnimator.ofFloat(acceptDeclineView, View.SCALE_X, acceptDeclineView.getScaleX(), 1f, 1f, 1f);

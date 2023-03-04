@@ -209,13 +209,13 @@ public class VoIPStatusTextView extends FrameLayout {
             float outScale = 0.4f + 0.6f * (1f - v);
             in.setTranslationY(AndroidUtilities.dp(10) * (1f - v));
             in.setAlpha(v);
-            in.setScaleX(inScale);
-            in.setScaleY(inScale);
+            //in.setScaleX(inScale);
+            //in.setScaleY(inScale);
 
             out.setTranslationY(-AndroidUtilities.dp(10) * v);
             out.setAlpha(1f - v);
-            out.setScaleX(outScale);
-            out.setScaleY(outScale);
+            //out.setScaleX(outScale);
+            //out.setScaleY(outScale);
         });
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
