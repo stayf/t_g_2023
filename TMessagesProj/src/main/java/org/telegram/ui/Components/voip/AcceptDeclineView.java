@@ -367,12 +367,12 @@ public class AcceptDeclineView extends View {
 
         if (retryMod) {
             canvas.save();
-            canvas.translate(buttonWidth / 2f - retryLayout.getWidth() / 2f, buttonWidth + AndroidUtilities.dp(2));
+            canvas.translate(buttonWidth / 2f - retryLayout.getWidth() / 2f, buttonWidth + AndroidUtilities.dp(4));
             retryLayout.draw(canvas);
             canvas.restore();
         } else {
             canvas.save();
-            canvas.translate(buttonWidth / 2f - acceptLayout.getWidth() / 2f, buttonWidth + AndroidUtilities.dp(2));
+            canvas.translate(buttonWidth / 2f - acceptLayout.getWidth() / 2f, buttonWidth + AndroidUtilities.dp(4));
             acceptLayout.draw(canvas);
             canvas.restore();
         }

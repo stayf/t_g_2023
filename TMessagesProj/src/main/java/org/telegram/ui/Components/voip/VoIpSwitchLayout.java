@@ -56,14 +56,14 @@ public class VoIpSwitchLayout extends FrameLayout {
         currentTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
         currentTextView.setTextColor(Color.WHITE);
         currentTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(currentTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 4, 0, 0));
+        addView(currentTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 6, 0, 0));
 
         newTextView = new TextView(context);
         newTextView.setGravity(Gravity.CENTER_HORIZONTAL);
         newTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
         newTextView.setTextColor(Color.WHITE);
         newTextView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(newTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 4, 0, 0));
+        addView(newTextView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, VoIpButtonView.ITEM_SIZE + 6, 0, 0));
         currentTextView.setVisibility(GONE);
         newTextView.setVisibility(GONE);
     }

@@ -96,7 +96,7 @@ public class VoIPToggleButton extends FrameLayout {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
             textView.setTextColor(Color.WHITE);
             textView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-            textLayoutContainer.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, radius + 4, 0, 0));
+            textLayoutContainer.addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, radius + 6, 0, 0));
             this.textView[i] = textView;
         }
         textView[1].setVisibility(View.GONE);
