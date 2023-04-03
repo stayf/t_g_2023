@@ -4743,7 +4743,7 @@ public class AndroidUtilities {
         }
         File file = new File(cachePath, fileName);
         try (FileOutputStream out = new FileOutputStream(file)) {
-            bitmap.compress(format, 100, out);
+            bitmap.compress(format, 87, out);
             out.close();
             return FileProvider.getUriForFile(ApplicationLoader.applicationContext, ApplicationLoader.getApplicationId() + ".provider", file);
         } catch (Exception e) {
