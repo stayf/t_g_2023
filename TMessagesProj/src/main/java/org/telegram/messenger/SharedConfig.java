@@ -250,7 +250,9 @@ public class SharedConfig {
             -1394191140, // SAMSUNG A12 (Galaxy A12)
             -270252297, // SAMSUNG A12S (Galaxy A12)
             -270251367, // SAMSUNG A21S (Galaxy A21s)
-            -270252359  // SAMSUNG A10S (Galaxy A10s)
+            -270252359, // SAMSUNG A10S (Galaxy A10s)
+            220599115, // SAMSUNG J6LTE
+            1737652784 // SAMSUNG J6PRIMELTE
     };
 
     private static final int[] AVERAGE_DEVICES = {
@@ -266,9 +268,7 @@ public class SharedConfig {
             1908524435, // XIAOMI SURYA (Poco X3 NFC)
             -215787089, // XIAOMI KAMA (Poco X3)
             -215458996, // XIAOMI VAYU (Poco X3 Pro)
-            -1394179578, // SAMSUNG M21
-            220599115, // SAMSUNG J6LTE
-            1737652784 // SAMSUNG J6PRIMELTE
+            -1394179578 // SAMSUNG M21
     };
 
     static {
