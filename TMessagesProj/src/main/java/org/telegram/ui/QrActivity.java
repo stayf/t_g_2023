@@ -23,7 +23,10 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.text.Layout;
@@ -36,6 +39,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
+import android.view.PixelCopy;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -1542,20 +1546,39 @@ public class QrActivity extends BaseFragment {
             }
         }
 
-        @SuppressLint("NotifyDataSetChanged")
         private void setupLightDarkTheme(boolean isDark) {
             if (changeDayNightViewAnimator != null) {
                 changeDayNightViewAnimator.cancel();
             }
-            FrameLayout decorView1 = (FrameLayout) fragment.getParentActivity().getWindow().getDecorView();
-            FrameLayout decorView2 = (FrameLayout) window.getDecorView();
-            Bitmap bitmap = Bitmap.createBitmap(decorView2.getWidth(), decorView2.getHeight(), Bitmap.Config.ARGB_8888);
+            FrameLayout decorView = (FrameLayout) window.getDecorView();
+            Bitmap bitmap = Bitmap.createBitmap(decorView.getWidth(), decorView.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas bitmapCanvas = new Canvas(bitmap);
-            darkThemeView.setAlpha(0f);
-            decorView1.draw(bitmapCanvas);
-            decorView2.draw(bitmapCanvas);
-            darkThemeView.setAlpha(1f);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                PixelCopy.request(window, bitmap, copyResult -> {
+                    if (copyResult == PixelCopy.SUCCESS) {
+                        int[] switcherLocation = new int[2];
+                        darkThemeView.getLocationInWindow(switcherLocation);
+                        float x = switcherLocation[0];
+                        float y = switcherLocation[1];
+                        bitmapCanvas.drawRect(x, y, x + darkThemeView.getMeasuredWidth(), y + darkThemeView.getMeasuredHeight(), backgroundPaint);
+                        switchLightDarkTheme(isDark, bitmap, decorView, bitmapCanvas);
+                    } else {
+                        darkThemeView.setAlpha(0f);
+                        decorView.draw(bitmapCanvas);
+                        darkThemeView.setAlpha(1f);
+                        switchLightDarkTheme(isDark, bitmap, decorView, bitmapCanvas);
+                    }
+                }, new Handler(Looper.getMainLooper()));
+            } else {
+                darkThemeView.setAlpha(0f);
+                decorView.draw(bitmapCanvas);
+                darkThemeView.setAlpha(1f);
+                switchLightDarkTheme(isDark, bitmap, decorView, bitmapCanvas);
+            }
+        }
 
+        @SuppressLint("NotifyDataSetChanged")
+        private void switchLightDarkTheme(boolean isDark, Bitmap bitmap, FrameLayout decorView, Canvas bitmapCanvas) {
             Paint xRefPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             xRefPaint.setColor(0xff000000);
             xRefPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -1614,7 +1637,7 @@ public class QrActivity extends BaseFragment {
             changeDayNightViewAnimator.setInterpolator(Easings.easeInOutQuad);
             changeDayNightViewAnimator.start();
 
-            decorView2.addView(changeDayNightView, new ViewGroup.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+            decorView.addView(changeDayNightView, new ViewGroup.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
 
             AndroidUtilities.runOnUIThread(() -> {
                 if (adapter == null || adapter.items == null) {
