@@ -10064,7 +10064,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         bitmap = centerImage.getBitmap();
                         orientation = centerImage.getOrientation();
                     } else {
-                        bitmap = BitmapFactory.decodeFile(originalPath);
+                        bitmap = ImageLoader.loadBitmap(originalPath, null, centerImage.getBitmapWidth(), centerImage.getBitmapHeight(), true);
                     }
                 }
 
