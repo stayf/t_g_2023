@@ -12,6 +12,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.ImageLocation;
+import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MediaDataController;
 import org.telegram.messenger.MessageObject;
@@ -84,6 +85,9 @@ public class ChatGreetingsView extends LinearLayout {
         } else {
             TLRPC.PhotoSize thumb = FileLoader.getClosestPhotoSizeWithSize(sticker.thumbs, 90);
             stickerToSendView.setImage(ImageLocation.getForDocument(sticker), createFilter(sticker), ImageLocation.getForDocument(thumb, sticker), null, 0, sticker);
+        }
+        if (!LiteMode.isEnabled(LiteMode.FLAG_ANIMATED_STICKERS_CHAT)) {
+            stickerToSendView.getImageReceiver().setAutoRepeatCount(1);
         }
         stickerToSendView.setOnClickListener(v -> {
             if (listener != null) {
