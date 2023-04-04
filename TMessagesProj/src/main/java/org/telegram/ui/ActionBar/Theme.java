@@ -6860,7 +6860,7 @@ public class Theme {
                     SharedPreferences preferences = MessagesController.getGlobalMainSettings();
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("theme", themeInfo.getKey());
-                    editor.commit();
+                    editor.apply();
                 }
                 String[] wallpaperLink = new String[1];
                 if (themeInfo.assetName != null) {
@@ -6945,7 +6945,7 @@ public class Theme {
                     SharedPreferences preferences = MessagesController.getGlobalMainSettings();
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.remove("theme");
-                    editor.commit();
+                    editor.apply();
                 }
                 currentColorsNoAccent.clear();
                 themedWallpaperFileOffset = 0;
