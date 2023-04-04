@@ -12936,7 +12936,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 canvas.scale(s, s, getMeasuredWidth() / 2f, getMeasuredHeight() / 2f);
             }
             super.dispatchDraw(canvas);
-            if (fragmentContextView != null && fragmentContextView.isCallStyle()) {
+            if (fragmentContextView != null && fragmentContextView.isCallStyle() && fragmentContextView.getVisibility() == View.VISIBLE) {
                 float alpha = (blurredView != null && blurredView.getVisibility() == View.VISIBLE) ? 1f - blurredView.getAlpha() : 1f;
                 if (alpha > 0) {
                     if (alpha == 1f) {
