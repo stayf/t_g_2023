@@ -4816,6 +4816,14 @@ public class ChatActivityEnterView extends BlurredFrameLayout implements Notific
 
     private Runnable hideKeyboardRunnable;
 
+    public void pauseVisibleStickersAndGifs() {
+        emojiView.pauseVisibleStickersAndGifs();
+    }
+
+    public void resumeVisibleStickersAndGifs() {
+        emojiView.resumeVisibleStickersAndGifs();
+    }
+
     public void onPause() {
         isPaused = true;
         if (senderSelectPopupWindow != null) {

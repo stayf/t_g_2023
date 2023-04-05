@@ -10212,7 +10212,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         chatAttachAlert.init();
         chatAttachAlert.getCommentTextView().setText(chatActivityEnterView.getFieldText());
         chatAttachAlert.parentThemeDelegate = themeDelegate;
-        showDialog(chatAttachAlert);
+        chatActivityEnterView.pauseVisibleStickersAndGifs();
+        showDialog(chatAttachAlert, dialog -> chatActivityEnterView.resumeVisibleStickersAndGifs());
     }
 
     private void showFloatingDateView(boolean scroll) {

@@ -181,6 +181,10 @@ public class ScrollSlidingTabStrip extends HorizontalScrollView {
         defaultExpandLayoutParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0F);
     }
 
+    public LinearLayout getTabsContainer() {
+        return tabsContainer;
+    }
+
     public void setDelegate(ScrollSlidingTabStripDelegate scrollSlidingTabStripDelegate) {
         delegate = scrollSlidingTabStripDelegate;
     }

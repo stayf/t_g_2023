@@ -2502,6 +2502,31 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         return allowStartAnimation;
     }
 
+    public void correctResumePauseAnimation(boolean resume) {
+        if (resume) {
+            correctResumeAnimation();
+        } else {
+            correctPauseAnimation();
+        }
+    }
+
+    public void correctResumeAnimation() {
+        setAllowStartAnimation(true);
+        setAllowStartLottieAnimation(true);
+        if (getLottieAnimation() != null)
+            getLottieAnimation().start();
+        startAnimation();
+        invalidate();
+    }
+
+    public void correctPauseAnimation() {
+        setAllowStartAnimation(false);
+        setAllowStartLottieAnimation(false);
+        if (getLottieAnimation() != null)
+            getLottieAnimation().stop();
+        stopAnimation();
+    }
+
     public void startAnimation() {
         AnimatedFileDrawable animation = getAnimation();
         if (animation != null) {

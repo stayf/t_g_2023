@@ -4294,6 +4294,73 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         super.dispatchDraw(canvas);
     }
 
+    public void pauseVisibleStickersAndGifs() {
+        if (currentPage == Type.STICKERS) startStopVisibleEmojis(false);
+        if (currentPage == Type.GIFS) startStopVisibleGifs(false);
+        if (currentPage == Type.EMOJIS) startStopVisibleStickers(false);
+    }
+
+    public void resumeVisibleStickersAndGifs() {
+        if (currentPage == Type.STICKERS) startStopVisibleEmojis(true);
+        if (currentPage == Type.GIFS) startStopVisibleGifs(true);
+        if (currentPage == Type.EMOJIS) startStopVisibleStickers(true);
+    }
+
+    private void startStopVisibleEmojis(boolean start) {
+        if (emojiGridView == null) {
+            return;
+        }
+        int count = emojiGridView.getChildCount();
+        for (int a = 0; a < count; a++) {
+            View child = emojiGridView.getChildAt(a);
+            if (child instanceof EmojiView.ImageViewEmoji) {
+                EmojiView.ImageViewEmoji cell = (EmojiView.ImageViewEmoji) child;
+                AnimatedEmojiDrawable drawable = cell.drawable;
+                if (drawable != null) {
+                    drawable.getImageReceiver().correctResumePauseAnimation(start);
+                }
+            }
+        }
+    }
+
+    private void startStopVisibleStickers(boolean start) {
+        if (stickersGridView == null) {
+            return;
+        }
+        int count = stickersGridView.getChildCount();
+        for (int a = 0; a < count; a++) {
+            View child = stickersGridView.getChildAt(a);
+            if (child instanceof StickerEmojiCell) {
+                StickerEmojiCell cell = (StickerEmojiCell) child;
+                cell.getImageView().correctResumePauseAnimation(start);
+            }
+
+            if (child instanceof TrendingListView) {
+                TrendingListView cell = (TrendingListView) child;
+                int childCount = cell.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    View subChild = cell.getChildAt(i);
+                    if (subChild instanceof BackupImageView) {
+                        BackupImageView subCell = (BackupImageView) subChild;
+                        subCell.getImageReceiver().correctResumePauseAnimation(start);
+                    }
+                }
+            }
+        }
+        if (stickersTab == null) {
+            return;
+        }
+        count = stickersTab.getTabsContainer().getChildCount();
+        for (int a = 0; a < count; a++) {
+            View child = stickersTab.getTabsContainer().getChildAt(a);
+            if (child instanceof StickerTabView) {
+                StickerTabView cell = (StickerTabView) child;
+                if (cell.imageView != null)
+                    cell.imageView.getImageReceiver().correctResumePauseAnimation(start);
+            }
+        }
+    }
+
     private void startStopVisibleGifs(boolean start) {
         if (gifGridView == null) {
             return;
@@ -4305,11 +4372,9 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                 ContextLinkCell cell = (ContextLinkCell) child;
                 ImageReceiver imageReceiver = cell.getPhotoImage();
                 if (start) {
-                    imageReceiver.setAllowStartAnimation(true);
-                    imageReceiver.startAnimation();
+                    imageReceiver.correctResumeAnimation();
                 } else {
-                    imageReceiver.setAllowStartAnimation(false);
-                    imageReceiver.stopAnimation();
+                    imageReceiver.correctPauseAnimation();
                 }
             }
         }
