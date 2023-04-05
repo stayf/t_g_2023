@@ -24,14 +24,16 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 
 import java.util.ArrayList;
 
 public class VideoTimelinePlayView extends View {
 
-    private long videoLength;
+    private volatile long videoLength;
     private float progressLeft;
     private float progressRight = 1;
     private Paint paint;
@@ -41,11 +43,10 @@ public class VideoTimelinePlayView extends View {
     private boolean pressedPlay;
     private float playProgress = 0.5f;
     private float pressDx;
-    private MediaMetadataRetriever mediaMetadataRetriever;
+    private volatile MediaMetadataRetriever mediaMetadataRetriever;
     private VideoTimelineViewDelegate delegate;
     private ArrayList<BitmapFrame> frames = new ArrayList<>();
     private AsyncTask<Integer, Integer, Bitmap> currentTask;
-    private static final Object sync = new Object();
     private long frameTimeOffset;
     private int frameWidth;
     private int frameHeight;
@@ -281,18 +282,24 @@ public class VideoTimelinePlayView extends View {
     }
 
     public void setVideoPath(String path, float left, float right) {
-        destroy();
-        mediaMetadataRetriever = new MediaMetadataRetriever();
+        clearFrames();
         progressLeft = left;
         progressRight = right;
-        try {
-            mediaMetadataRetriever.setDataSource(path);
-            String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            videoLength = Long.parseLong(duration);
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
         invalidate();
+        Utilities.metadataQueue.postRunnable(() -> {
+            releaseMetadataRetriever();
+            mediaMetadataRetriever = new MediaMetadataRetriever();
+            try {
+                mediaMetadataRetriever.setDataSource(path);
+                String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                videoLength = Long.parseLong(duration);
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+            AndroidUtilities.runOnUIThread(() -> {
+                if (frames.isEmpty() && currentTask == null) reloadFrames(0);
+            });
+        });
     }
 
     public void setRightProgress(float value) {
@@ -372,28 +379,20 @@ public class VideoTimelinePlayView extends View {
         currentTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, frameNum, null, null);
     }
 
+    private void releaseMetadataRetriever() {
+        try {
+            if (mediaMetadataRetriever != null) {
+                mediaMetadataRetriever.release();
+                mediaMetadataRetriever = null;
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
     public void destroy() {
-        synchronized (sync) {
-            try {
-                if (mediaMetadataRetriever != null) {
-                    mediaMetadataRetriever.release();
-                    mediaMetadataRetriever = null;
-                }
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
-        }
-        for (int a = 0; a < frames.size(); a++) {
-            BitmapFrame bitmap = frames.get(a);
-            if (bitmap != null && bitmap.bitmap != null) {
-                bitmap.bitmap.recycle();
-            }
-        }
-        frames.clear();
-        if (currentTask != null) {
-            currentTask.cancel(true);
-            currentTask = null;
-        }
+        Utilities.metadataQueue.postRunnable(this::releaseMetadataRetriever);
+        clearFrames();
     }
 
     public boolean isDragging() {
@@ -405,7 +404,7 @@ public class VideoTimelinePlayView extends View {
         invalidate();
     }
 
-    public void clearFrames() {
+    private void clearFrames() {
         for (int a = 0; a < frames.size(); a++) {
             BitmapFrame frame = frames.get(a);
             if (frame != null) {
@@ -417,7 +416,6 @@ public class VideoTimelinePlayView extends View {
             currentTask.cancel(true);
             currentTask = null;
         }
-        invalidate();
     }
 
     @Override
@@ -427,6 +425,7 @@ public class VideoTimelinePlayView extends View {
         if (lastWidth != widthSize) {
             clearFrames();
             lastWidth = widthSize;
+            invalidate();
         }
     }
 
