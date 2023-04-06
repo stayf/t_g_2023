@@ -11460,7 +11460,8 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (view instanceof ChatMessageCell) {
                 ChatMessageCell messageCell = (ChatMessageCell) view;
                 MessageObject messageObject = messageCell.getMessageObject();
-                if (videoPlayerContainer != null && (messageObject.isRoundVideo() || messageObject.isVideo()) && !messageObject.isVoiceTranscriptionOpen() && MediaController.getInstance().isPlayingMessage(messageObject)) {
+
+                if (videoPlayerContainer != null && (messageObject.isRoundVideo() || messageObject.isVideo()) && !messageObject.isVoiceTranscriptionOpen() && MediaController.getInstance().isPlayingMessage(messageObject) && !MediaController.getInstance().isMessagePaused()) {
                     ImageReceiver imageReceiver = messageCell.getPhotoImage();
                     videoPlayerContainer.setTranslationX(imageReceiver.getImageX() + messageCell.getX());
                     float translationY = messageCell.getY() + imageReceiver.getImageY() + chatListView.getY() - videoPlayerContainer.getTop();
