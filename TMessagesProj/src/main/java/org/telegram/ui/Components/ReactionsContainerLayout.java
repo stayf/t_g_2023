@@ -786,7 +786,6 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
         canvas.restoreToCount(s);
 
         drawBubbles(canvas, br, cPr, sr, 255);
-        invalidate();
     }
 
     public void drawBubbles(Canvas canvas) {
@@ -798,7 +797,6 @@ public class ReactionsContainerLayout extends FrameLayout implements Notificatio
 
     private void drawBubbles(Canvas canvas, float br, float cPr, float sr, int alpha) {
         canvas.save();
-        float scale = transitionProgress;
         canvas.clipRect(0, AndroidUtilities.lerp(rect.bottom, 0, CubicBezierInterpolator.DEFAULT.getInterpolation(flipVerticalProgress)) - (int) Math.ceil(rect.height() / 2f * (1f - transitionProgress)), getMeasuredWidth(), AndroidUtilities.lerp(getMeasuredHeight() + AndroidUtilities.dp(8), getPaddingTop() - expandSize(), CubicBezierInterpolator.DEFAULT.getInterpolation(flipVerticalProgress)));
         float cx = LocaleController.isRTL || mirrorX ? bigCircleOffset : getWidth() - bigCircleOffset;
         float cy = getHeight() - getPaddingBottom() + expandSize();
