@@ -67,6 +67,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Cells.DrawerProfileCell;
 import org.telegram.ui.Components.BottomPagesView;
+import org.telegram.ui.Components.FlickeringButton;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieDrawable;
 import org.telegram.ui.Components.RLottieImageView;
@@ -93,7 +94,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
     private ViewPager viewPager;
     private BottomPagesView bottomPages;
     private TextView switchLanguageTextView;
-    private TextView startMessagingButton;
+    private FlickeringButton startMessagingButton;
     private FrameLayout frameLayout2;
     private FrameLayout frameContainerView;
 
@@ -314,23 +315,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             }
         });
 
-        startMessagingButton = new TextView(context) {
-            CellFlickerDrawable cellFlickerDrawable;
-
-            @Override
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-                if (cellFlickerDrawable == null) {
-                    cellFlickerDrawable = new CellFlickerDrawable();
-                    cellFlickerDrawable.drawFrame = false;
-                    cellFlickerDrawable.repeatProgress = 2f;
-                }
-                cellFlickerDrawable.setParentWidth(getMeasuredWidth());
-                AndroidUtilities.rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                cellFlickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(4), null);
-                invalidate();
-            }
-
+        startMessagingButton = new FlickeringButton(context) {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 int size = MeasureSpec.getSize(widthMeasureSpec);
@@ -341,6 +326,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 }
             }
         };
+        startMessagingButton.setNeedFlickering(true);
         startMessagingButton.setText(LocaleController.getString("StartMessaging", R.string.StartMessaging));
         startMessagingButton.setGravity(Gravity.CENTER);
         startMessagingButton.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
@@ -427,12 +413,13 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
         }
+        startMessagingButton.resume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
+        startMessagingButton.pause();
         if (!AndroidUtilities.isTablet()) {
             Activity activity = getParentActivity();
             if (activity != null) {

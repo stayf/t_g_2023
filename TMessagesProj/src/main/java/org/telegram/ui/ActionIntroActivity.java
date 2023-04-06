@@ -51,6 +51,7 @@ import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.ActionBar.ThemeDescription;
 import org.telegram.ui.Components.AlertsCreator;
+import org.telegram.ui.Components.FlickeringButton;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.RLottieImageView;
 import org.telegram.ui.Components.ShareLocationDrawable;
@@ -65,7 +66,7 @@ import java.util.ArrayList;
 public class ActionIntroActivity extends BaseFragment implements LocationController.LocationFetchCallback {
 
     private RLottieImageView imageView;
-    private TextView buttonTextView;
+    private FlickeringButton buttonTextView;
     private TextView subtitleTextView;
     private TextView titleTextView;
     private TextView descriptionText;
@@ -577,26 +578,7 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
         }
         viewGroup.addView(descriptionText2);
 
-        buttonTextView = new TextView(context) {
-            CellFlickerDrawable cellFlickerDrawable;
-
-            @Override
-            protected void onDraw(Canvas canvas) {
-                super.onDraw(canvas);
-                if (flickerButton) {
-                    if (cellFlickerDrawable == null) {
-                        cellFlickerDrawable = new CellFlickerDrawable();
-                        cellFlickerDrawable.drawFrame = false;
-                        cellFlickerDrawable.repeatProgress = 2f;
-                    }
-                    cellFlickerDrawable.setParentWidth(getMeasuredWidth());
-                    AndroidUtilities.rectTmp.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                    cellFlickerDrawable.draw(canvas, AndroidUtilities.rectTmp, AndroidUtilities.dp(4), null);
-                    invalidate();
-                }
-            }
-        };
-
+        buttonTextView = new FlickeringButton(context);
         buttonTextView.setPadding(AndroidUtilities.dp(34), 0, AndroidUtilities.dp(34), 0);
         buttonTextView.setGravity(Gravity.CENTER);
         buttonTextView.setTextColor(Theme.getColor(Theme.key_featuredStickers_buttonText));
@@ -767,6 +749,7 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
         }
 
         if (flickerButton) {
+            buttonTextView.setNeedFlickering(true);
             buttonTextView.setPadding(AndroidUtilities.dp(34), AndroidUtilities.dp(8), AndroidUtilities.dp(34), AndroidUtilities.dp(8));
             buttonTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         }
@@ -786,8 +769,15 @@ public class ActionIntroActivity extends BaseFragment implements LocationControl
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        buttonTextView.pause();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        buttonTextView.resume();
         if (currentType == ACTION_TYPE_NEARBY_LOCATION_ENABLED) {
             boolean enabled = true;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

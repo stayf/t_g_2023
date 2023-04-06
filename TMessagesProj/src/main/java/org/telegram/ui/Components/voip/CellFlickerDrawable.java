@@ -130,6 +130,15 @@ public class CellFlickerDrawable {
         gradientShader2.setLocalMatrix(matrix);
     }
 
+    public void simpleDraw(Canvas canvas, RectF rectF, float rad) {
+        canvas.drawRoundRect(rectF, rad, rad, paint);
+        float x = (parentWidth + size * 2) * progress - size;
+        matrix.reset();
+        matrix.setTranslate(x, 0);
+        gradientShader.setLocalMatrix(matrix);
+        gradientShader2.setLocalMatrix(matrix);
+    }
+
     public void draw(Canvas canvas, GroupCallMiniTextureView view) {
         long currentTime = System.currentTimeMillis();
         if (lastUpdateTime != 0) {
