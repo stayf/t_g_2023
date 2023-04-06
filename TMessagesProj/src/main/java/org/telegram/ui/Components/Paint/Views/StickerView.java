@@ -91,6 +91,14 @@ public class StickerView extends EntityView {
         }
     }
 
+    public void pause() {
+        centerImage.correctPauseAnimation();
+    }
+
+    public void resume() {
+        centerImage.correctResumeAnimation();
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();

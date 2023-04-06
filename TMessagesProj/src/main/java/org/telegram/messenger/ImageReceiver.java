@@ -2502,7 +2502,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         return allowStartAnimation;
     }
 
-    public void correctResumePauseAnimation(boolean resume) {
+    public void toggleAnimationState(boolean resume) {
         if (resume) {
             correctResumeAnimation();
         } else {

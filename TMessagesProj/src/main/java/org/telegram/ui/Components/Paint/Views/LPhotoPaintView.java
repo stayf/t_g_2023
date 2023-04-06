@@ -1312,9 +1312,11 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
         };
         stickerMasksAlert.setDelegate((parentObject, sticker) -> createSticker(parentObject, sticker, true));
         stickerMasksAlert.setOnDismissListener(dialog -> {
+            entitiesView.resumeStickersAnimation();
             onOpenCloseStickersAlert(false);
             switchTab(wasSelectedIndex);
         });
+        entitiesView.pauseStickersAnimation();
         stickerMasksAlert.show();
         onOpenCloseStickersAlert(true);
     }

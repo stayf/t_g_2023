@@ -4317,7 +4317,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                 EmojiView.ImageViewEmoji cell = (EmojiView.ImageViewEmoji) child;
                 AnimatedEmojiDrawable drawable = cell.drawable;
                 if (drawable != null) {
-                    drawable.getImageReceiver().correctResumePauseAnimation(start);
+                    drawable.getImageReceiver().toggleAnimationState(start);
                 }
             }
         }
@@ -4332,7 +4332,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             View child = stickersGridView.getChildAt(a);
             if (child instanceof StickerEmojiCell) {
                 StickerEmojiCell cell = (StickerEmojiCell) child;
-                cell.getImageView().correctResumePauseAnimation(start);
+                cell.getImageView().toggleAnimationState(start);
             }
 
             if (child instanceof TrendingListView) {
@@ -4342,7 +4342,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                     View subChild = cell.getChildAt(i);
                     if (subChild instanceof BackupImageView) {
                         BackupImageView subCell = (BackupImageView) subChild;
-                        subCell.getImageReceiver().correctResumePauseAnimation(start);
+                        subCell.getImageReceiver().toggleAnimationState(start);
                     }
                 }
             }
@@ -4356,7 +4356,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             if (child instanceof StickerTabView) {
                 StickerTabView cell = (StickerTabView) child;
                 if (cell.imageView != null)
-                    cell.imageView.getImageReceiver().correctResumePauseAnimation(start);
+                    cell.imageView.getImageReceiver().toggleAnimationState(start);
             }
         }
     }
@@ -4371,11 +4371,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             if (child instanceof ContextLinkCell) {
                 ContextLinkCell cell = (ContextLinkCell) child;
                 ImageReceiver imageReceiver = cell.getPhotoImage();
-                if (start) {
-                    imageReceiver.correctResumeAnimation();
-                } else {
-                    imageReceiver.correctPauseAnimation();
-                }
+                imageReceiver.toggleAnimationState(start);
             }
         }
     }

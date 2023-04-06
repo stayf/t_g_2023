@@ -41,6 +41,26 @@ public class EntitiesContainerView extends FrameLayout implements ScaleGestureDe
         return count;
     }
 
+    public void pauseStickersAnimation() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view instanceof StickerView) {
+                StickerView stickerView = (StickerView) view;
+                stickerView.pause();
+            }
+        }
+    }
+
+    public void resumeStickersAnimation() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view instanceof StickerView) {
+                StickerView stickerView = (StickerView) view;
+                stickerView.resume();
+            }
+        }
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return ev.getPointerCount() == 2 && delegate.shouldReceiveTouches();
