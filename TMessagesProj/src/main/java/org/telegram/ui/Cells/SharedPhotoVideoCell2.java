@@ -295,7 +295,12 @@ public class SharedPhotoVideoCell2 extends View {
                 }
                 canvas.drawRect(localPadding, localPadding, localPadding + imageWidth, localPadding + imageHeight, globalGradientView.getPaint());
             }
-            invalidate();
+            if (style == STYLE_CACHE) {
+                if (!imageReceiver.hasBitmapImage() || imageReceiver.getCurrentAlpha() != 1.0f || imageAlpha != 1f)
+                    invalidate();
+            } else {
+                invalidate();
+            }
         }
 
         if (imageAlpha != 1f) {
