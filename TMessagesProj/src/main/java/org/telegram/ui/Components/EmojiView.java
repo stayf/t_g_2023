@@ -4316,7 +4316,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             if (child instanceof EmojiView.ImageViewEmoji) {
                 EmojiView.ImageViewEmoji cell = (EmojiView.ImageViewEmoji) child;
                 AnimatedEmojiDrawable drawable = cell.drawable;
-                if (drawable != null) {
+                if (drawable != null && drawable.getImageReceiver() != null) {
                     drawable.getImageReceiver().toggleAnimationState(start);
                 }
             }
