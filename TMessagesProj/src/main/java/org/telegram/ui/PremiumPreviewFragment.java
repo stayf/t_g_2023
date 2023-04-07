@@ -31,6 +31,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -153,10 +154,10 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     private int firstViewHeight;
     private boolean isDialogVisible;
 
-    boolean inc;
     float progress;
     private int currentYOffset;
     private FrameLayout contentView;
+    private View topGradientView;
     private PremiumButtonView premiumButtonView;
     float totalProgress;
     private String source;
@@ -170,6 +171,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
 
     private boolean forcePremium;
     float progressToFull;
+    private ValueAnimator animator;
 
     public static int serverStringToFeatureType(String s) {
         switch (s) {
@@ -268,6 +270,27 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public View createView(Context context) {
+        animator = ValueAnimator.ofFloat(1f, 3f);
+        animator.addUpdateListener(animation -> {
+            progress = (float) animation.getAnimatedValue();
+            if (contentView.getMeasuredWidth() == 0 || contentView.getMeasuredHeight() == 0) return;
+            backgroundView.imageView.mRenderer.gradientStartX = (backgroundView.getX() + backgroundView.imageFrameLayout.getX() + contentView.getMeasuredWidth() * 0.1f * progress) / contentView.getMeasuredWidth();
+            backgroundView.imageView.mRenderer.gradientStartY = (backgroundView.getY() + backgroundView.imageFrameLayout.getY()) / contentView.getMeasuredHeight();
+
+            if (totalProgress == 1f) {
+                backgroundView.imageView.setPaused(true);
+                particlesView.setPaused(true);
+            } else {
+                gradientTools.gradientMatrix(0, 0, contentView.getMeasuredWidth(), contentView.getMeasuredHeight(), -contentView.getMeasuredWidth() * 0.1f * progress, 0);
+                topGradientView.invalidate();
+                backgroundView.imageView.setPaused(false);
+                particlesView.setPaused(false);
+            }
+        });
+        animator.setDuration(2000);
+        animator.setInterpolator(new LinearInterpolator());
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
         hasOwnBackground = true;
         shader = new LinearGradient(
             0, 0, 0, 100,
@@ -378,19 +401,6 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
 
             @Override
             protected void dispatchDraw(Canvas canvas) {
-                if (!isDialogVisible) {
-                    if (inc) {
-                        progress += 16f / 1000f;
-                        if (progress > 3) {
-                            inc = false;
-                        }
-                    } else {
-                        progress -= 16f / 1000f;
-                        if (progress < 1) {
-                            inc = true;
-                        }
-                    }
-                }
                 View firstView = null;
                 if (listView.getLayoutManager() != null) {
                     firstView = listView.getLayoutManager().findViewByPosition(0);
@@ -440,15 +450,6 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
                 float toX = AndroidUtilities.dp(72) - backgroundView.titleView.getLeft();
                 float f = totalProgress > 0.3f ? (totalProgress - 0.3f) / 0.7f : 0f;
                 backgroundView.titleView.setTranslationX(toX * (1f - CubicBezierInterpolator.EASE_OUT_QUINT.getInterpolation(1 - f)));
-
-                backgroundView.imageView.mRenderer.gradientStartX = (backgroundView.getX() + backgroundView.imageFrameLayout.getX() + getMeasuredWidth() * 0.1f * progress) / getMeasuredWidth();
-                backgroundView.imageView.mRenderer.gradientStartY = (backgroundView.getY() + backgroundView.imageFrameLayout.getY()) / getMeasuredHeight();
-
-                if (!isDialogVisible) {
-                    invalidate();
-                }
-                gradientTools.gradientMatrix(0, 0, getMeasuredWidth(), getMeasuredHeight(), -getMeasuredWidth() * 0.1f * progress, 0);
-                canvas.drawRect(0, 0, getMeasuredWidth(), currentYOffset + AndroidUtilities.dp(20), gradientTools.paint);
 
                 super.dispatchDraw(canvas);
             }
@@ -517,6 +518,14 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         };
         particlesView = new StarParticlesView(context);
         backgroundView.imageView.setStarParticlesView(particlesView);
+
+        topGradientView = new View(context) {
+            @Override
+            protected void onDraw(Canvas canvas) {
+                canvas.drawRect(0, 0, getMeasuredWidth(), currentYOffset + AndroidUtilities.dp(20), gradientTools.paint);
+            }
+        };
+        contentView.addView(topGradientView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
         contentView.addView(particlesView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         contentView.addView(backgroundView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
@@ -913,6 +922,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     @Override
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
+        animator.cancel();
 
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.billingProductDetailsUpdated);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.currentUserPremiumStatusChanged);
@@ -1497,11 +1507,18 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
         backgroundView.imageView.setPaused(false);
         backgroundView.imageView.setDialogVisible(false);
         particlesView.setPaused(false);
+        if (!animator.isStarted()) {
+            animator.start();
+        } else {
+            animator.resume();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        animator.pause();
+        backgroundView.imageView.setPaused(true);
         backgroundView.imageView.setDialogVisible(true);
         particlesView.setPaused(true);
     }
@@ -1573,6 +1590,11 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
             isDialogVisible = isVisible;
             backgroundView.imageView.setDialogVisible(isVisible);
             particlesView.setPaused(isVisible);
+            if (isDialogVisible) {
+                animator.pause();
+            } else {
+                animator.resume();
+            }
             contentView.invalidate();
         }
     }
