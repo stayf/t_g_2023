@@ -1582,6 +1582,7 @@ public class PremiumPreviewFragment extends BaseFragment implements Notification
     @Override
     protected void onDialogDismiss(Dialog dialog) {
         super.onDialogDismiss(dialog);
+        if(isPaused) return;
         updateDialogVisibility(false);
     }
 
