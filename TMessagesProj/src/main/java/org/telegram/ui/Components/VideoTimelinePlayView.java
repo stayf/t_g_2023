@@ -288,17 +288,16 @@ public class VideoTimelinePlayView extends View {
         invalidate();
         Utilities.metadataQueue.postRunnable(() -> {
             releaseMetadataRetriever();
-            mediaMetadataRetriever = new MediaMetadataRetriever();
+            MediaMetadataRetriever localRetriever = new MediaMetadataRetriever();
             try {
-                mediaMetadataRetriever.setDataSource(path);
-                String duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                localRetriever.setDataSource(path);
+                String duration = localRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                 videoLength = Long.parseLong(duration);
+                mediaMetadataRetriever = localRetriever;
             } catch (Exception e) {
                 FileLog.e(e);
             }
-            AndroidUtilities.runOnUIThread(() -> {
-                if (frames.isEmpty() && currentTask == null) reloadFrames(0);
-            });
+            postInvalidate();
         });
     }
 
@@ -340,8 +339,10 @@ public class VideoTimelinePlayView extends View {
                 if (isCancelled()) {
                     return null;
                 }
+                MediaMetadataRetriever localRetriever = mediaMetadataRetriever;
+                if (localRetriever == null) return null;
                 try {
-                    bitmap = mediaMetadataRetriever.getFrameAtTime(frameTimeOffset * frameNum * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                    bitmap = localRetriever.getFrameAtTime(frameTimeOffset * frameNum * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
                     if (isCancelled()) {
                         return null;
                     }
@@ -367,7 +368,7 @@ public class VideoTimelinePlayView extends View {
 
             @Override
             protected void onPostExecute(Bitmap bitmap) {
-                if (!isCancelled()) {
+                if (!isCancelled() && bitmap != null) {
                     frames.add(new BitmapFrame(bitmap));
                     invalidate();
                     if (frameNum < framesToLoad) {
