@@ -6266,9 +6266,6 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         if (drawPhotoImage && captionLayout == null) {
                             reactionsLayoutInBubble.totalHeight += AndroidUtilities.dp(8);
                         }
-                        if (captionLayout != null && currentMessageObject != null && currentMessageObject.isOutOwner() && currentMessageObject.isDocument() && currentMessagesGroup == null && !currentMessageObject.isForwarded() && !currentMessageObject.isReply()) {
-                            reactionsLayoutInBubble.positionOffsetY += AndroidUtilities.dp(10);
-                        }
 
                         int timeLeft = backgroundWidth - reactionsLayoutInBubble.lastLineX - AndroidUtilities.dp(31);
 
