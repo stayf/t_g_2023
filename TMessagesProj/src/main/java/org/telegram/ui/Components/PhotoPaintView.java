@@ -375,6 +375,11 @@ public class PhotoPaintView extends FrameLayout implements IPhotoPaintView, Enti
     }
 
     @Override
+    public void setOffsetTranslationX(float x) {
+
+    }
+
+    @Override
     public void setOffsetTranslationY(float y, float progress, int keyboardHeight, boolean isPan) {
         offsetTranslationY = y;
         getColorPicker().setTranslationY(y);

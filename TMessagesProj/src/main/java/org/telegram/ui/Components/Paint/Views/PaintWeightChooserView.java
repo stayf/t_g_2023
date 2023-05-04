@@ -56,6 +56,7 @@ public class PaintWeightChooserView extends View {
 
     public PaintWeightChooserView(Context context) {
         super(context);
+        setLayerType(LAYER_TYPE_HARDWARE, null);
 
         gestureDetector = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
             float startWeight;

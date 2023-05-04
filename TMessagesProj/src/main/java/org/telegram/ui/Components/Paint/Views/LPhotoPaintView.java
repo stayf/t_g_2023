@@ -1565,15 +1565,17 @@ public class LPhotoPaintView extends SizeNotifierFrameLayoutPhoto implements IPh
     }
 
     @Override
+    public void setOffsetTranslationX(float x) {
+        if (tabsSelectedIndex == 0) {
+            weightChooserView.setTranslationX(x);
+        }
+    }
+
+    @Override
     public void setOffsetTranslationY(float y, float progress, int keyboardHeight, boolean isPan) {
         offsetTranslationY = y;
         if (!isPan) {
             topLayout.setTranslationY(-y);
-
-            if (tabsSelectedIndex == 0) {
-                weightChooserView.setTranslationX(-y);
-            }
-
             bottomLayout.setTranslationY(y);
         } else {
             setTranslationY(0);
