@@ -471,6 +471,7 @@ public class TopicsFragment extends BaseFragment implements NotificationCenter.N
                     actionBarPaint.setColor(getThemedColor(Theme.key_windowBackgroundWhite));
                     actionBarPaint.setAlpha((int) (255 * searchAnimationProgress));
                     canvas.drawRect(0, 0, getWidth(), AndroidUtilities.statusBarHeight, actionBarPaint);
+                    canvas.drawLine(0, 0, 0, getHeight(), Theme.dividerPaint);
                 }
             }
 
