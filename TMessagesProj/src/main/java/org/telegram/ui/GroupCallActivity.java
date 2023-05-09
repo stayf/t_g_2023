@@ -1743,10 +1743,14 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
 
             @Override
             public void onOpenAnimationEnd() {
-                CountDownLatch latch = VoIPService.getSharedInstance().groupCallBottomSheetLatch;
-                if (latch != null) {
-                    latch.countDown();
+                VoIPService voipService = VoIPService.getSharedInstance();
+                if (voipService != null) {
+                    CountDownLatch latch = voipService.getGroupCallBottomSheetLatch();
+                    if (latch != null) {
+                        latch.countDown();
+                    }
                 }
+
                 if (muteButtonState == MUTE_BUTTON_STATE_SET_REMINDER) {
                     showReminderHint();
                 }

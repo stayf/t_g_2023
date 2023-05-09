@@ -316,8 +316,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	private boolean startedRinging;
 
 	private int classGuid;
-
-	public volatile CountDownLatch groupCallBottomSheetLatch;
+	private volatile CountDownLatch groupCallBottomSheetLatch;
 
 	private HashMap<String, Integer> currentStreamRequestTimestamp = new HashMap<>();
 	public boolean micSwitching;
@@ -468,6 +467,10 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			}
 		}
 	};
+
+	public CountDownLatch getGroupCallBottomSheetLatch() {
+		return groupCallBottomSheetLatch;
+	}
 
 	public boolean isFrontFaceCamera() {
 		return isFrontFaceCamera;
