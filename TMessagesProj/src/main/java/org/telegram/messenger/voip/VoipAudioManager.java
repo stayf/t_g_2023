@@ -9,11 +9,10 @@ import org.telegram.messenger.Utilities;
 
 public class VoipAudioManager {
 
-    private final AudioManager audioManager;
     private Boolean isSpeakerphoneOn;
 
     private VoipAudioManager() {
-        audioManager = (AudioManager) ApplicationLoader.applicationContext.getSystemService(AUDIO_SERVICE);
+
     }
 
     private static final class InstanceHolder {
@@ -24,8 +23,13 @@ public class VoipAudioManager {
         return InstanceHolder.instance;
     }
 
+    /**
+     * Sets the speakerphone on or off asynchronously.
+     * On Samsung devices {@link AudioManager#setSpeakerphoneOn} and {@link AudioManager#isSpeakerphoneOn} take too much time.
+     */
     public void setSpeakerphoneOn(boolean on) {
         isSpeakerphoneOn = on;
+        final AudioManager audioManager = getAudioManager();
         Utilities.globalQueue.postRunnable(() -> {
             audioManager.setSpeakerphoneOn(on);
         });
@@ -33,8 +37,13 @@ public class VoipAudioManager {
 
     public boolean isSpeakerphoneOn() {
         if (isSpeakerphoneOn == null) {
+            AudioManager audioManager = getAudioManager();
             return audioManager.isSpeakerphoneOn();
         }
         return isSpeakerphoneOn;
+    }
+
+    private AudioManager getAudioManager() {
+        return (AudioManager) ApplicationLoader.applicationContext.getSystemService(AUDIO_SERVICE);
     }
 }
