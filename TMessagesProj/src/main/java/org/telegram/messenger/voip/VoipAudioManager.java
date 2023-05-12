@@ -35,6 +35,10 @@ public class VoipAudioManager {
         });
     }
 
+    /**
+     * Checks whether the speakerphone is on or off.
+     * {@link AudioManager#isSpeakerphoneOn} is fast if {@link AudioManager#setSpeakerphoneOn} has not been called before.
+     */
     public boolean isSpeakerphoneOn() {
         if (isSpeakerphoneOn == null) {
             AudioManager audioManager = getAudioManager();
