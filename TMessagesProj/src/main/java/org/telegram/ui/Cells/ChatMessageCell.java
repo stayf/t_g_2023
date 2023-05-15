@@ -177,6 +177,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate, ImageReceiver.ImageReceiverDelegate, DownloadController.FileDownloadProgressListener, TextSelectionHelper.SelectableView, NotificationCenter.NotificationCenterDelegate {
     private final static int TIME_APPEAR_MS = 200;
+    private final static int UPLOADING_ALLOWABLE_ERROR = 1024 * 1024;
 
     public boolean clipToGroupBounds;
     public boolean drawForBlur;
@@ -12052,6 +12053,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 getIconForCurrentState();
                 radialProgress.setIcon(MediaActionDrawable.ICON_CHECK, false, true);
             }
+        }
+
+        if (lastLoadingSizeTotal > 0 && Math.abs(lastLoadingSizeTotal - totalSize) > UPLOADING_ALLOWABLE_ERROR) {
+            lastLoadingSizeTotal = totalSize;
         }
         createLoadingProgressLayout(uploadedSize, totalSize);
     }

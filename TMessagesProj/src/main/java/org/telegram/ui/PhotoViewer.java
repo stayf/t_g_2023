@@ -119,7 +119,6 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FloatValueHolder;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
-import androidx.exifinterface.media.ExifInterface;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScrollerEnd;
@@ -167,6 +166,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.messenger.WebFile;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.messenger.camera.Size;
 import org.telegram.messenger.video.VideoPlayerRewinder;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.TLObject;
@@ -17208,20 +17208,20 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private long captureFrameReadyAtTime = -1;
     private long needCaptureFrameReadyAtTime = -1;
 
-    private int selectedCompression;
-    private int compressionsCount = -1;
+    private volatile int selectedCompression;
+    private volatile int compressionsCount = -1;
     private int previousCompression;
 
     private int rotationValue;
-    private int originalWidth;
-    private int originalHeight;
-    private int resultWidth;
-    private int resultHeight;
-    private int bitrate;
-    private int originalBitrate;
+    private volatile int originalWidth;
+    private volatile int originalHeight;
+    private volatile int resultWidth;
+    private volatile int resultHeight;
+    private volatile int bitrate;
+    private volatile int originalBitrate;
     private float videoDuration;
     private int videoFramerate;
-    private boolean videoConvertSupported;
+    private volatile boolean videoConvertSupported;
     private long startTime;
     private long endTime;
     private float videoCutStart;
@@ -17547,6 +17547,48 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         containerView.invalidate();
     }
 
+    private Size calculateResultVideoSize() {
+        float maxSize;
+        int resultWidth;
+        int resultHeight;
+        switch (selectedCompression) {
+            case 0:
+                maxSize = 480.0f;
+                break;
+            case 1:
+                maxSize = 854.0f;
+                break;
+            case 2:
+                maxSize = 1280.0f;
+                break;
+            case 3:
+            default:
+                maxSize = 1920.0f;
+                break;
+        }
+        float scale = originalWidth > originalHeight ? maxSize / originalWidth : maxSize / originalHeight;
+        if (selectedCompression == compressionsCount - 1 && scale >= 1f) {
+            resultWidth = originalWidth;
+            resultHeight = originalHeight;
+        } else {
+            resultWidth = Math.round(originalWidth * scale / 2) * 2;
+            resultHeight = Math.round(originalHeight * scale / 2) * 2;
+        }
+        return new Size(resultWidth, resultHeight);
+    }
+
+    private void prepareRealEncoderBitrate() {
+        if (bitrate != 0 && sendPhotoType != SELECT_TYPE_AVATAR) {
+            Size resultSize = calculateResultVideoSize();
+            if (resultSize.getWidth() == originalWidth && resultSize.getHeight() == originalHeight) {
+                MediaController.extractRealEncoderBitrate(resultSize.getWidth(), resultSize.getHeight(), originalBitrate);
+            } else {
+                int targetBitrate = MediaController.makeVideoBitrate(originalHeight, originalWidth, originalBitrate, resultSize.getHeight(), resultSize.getWidth());
+                MediaController.extractRealEncoderBitrate(resultSize.getWidth(), resultSize.getHeight(), targetBitrate);
+            }
+        }
+    }
+
     private void updateWidthHeightBitrateForCompression() {
         if (compressionsCount <= 0) {
             return;
@@ -17560,41 +17602,24 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             resultWidth = Math.round(originalWidth * scale / 2) * 2;
             resultHeight = Math.round(originalHeight * scale / 2) * 2;
         } else {
-            float maxSize;
-            switch (selectedCompression) {
-                case 0:
-                    maxSize = 480.0f;
-                    break;
-                case 1:
-                    maxSize = 854.0f;
-                    break;
-                case 2:
-                    maxSize = 1280.0f;
-                    break;
-                case 3:
-                default:
-                    maxSize = 1920.0f;
-                    break;
-            }
-            float scale = originalWidth > originalHeight ? maxSize / originalWidth : maxSize / originalHeight;
-            if (selectedCompression == compressionsCount - 1 && scale >= 1f) {
-                resultWidth = originalWidth;
-                resultHeight = originalHeight;
-            } else {
-                resultWidth = Math.round(originalWidth * scale / 2) * 2;
-                resultHeight = Math.round(originalHeight * scale / 2) * 2;
-            }
+            Size resultSize = calculateResultVideoSize();
+            resultWidth = resultSize.getWidth();
+            resultHeight = resultSize.getHeight();
         }
 
         if (bitrate != 0) {
+            final int encoderBitrate;
             if (sendPhotoType == SELECT_TYPE_AVATAR) {
                 bitrate = 1560000;
+                encoderBitrate = bitrate;
             } else if (resultWidth == originalWidth && resultHeight == originalHeight) {
                 bitrate = originalBitrate;
+                encoderBitrate = MediaController.extractRealEncoderBitrate(resultWidth, resultHeight, bitrate);
             } else {
                 bitrate = MediaController.makeVideoBitrate(originalHeight, originalWidth, originalBitrate, resultHeight, resultWidth);
+                encoderBitrate = MediaController.extractRealEncoderBitrate(resultWidth, resultHeight, bitrate);
             }
-            videoFramesSize = (long) (bitrate / 8 * videoDuration / 1000);
+            videoFramesSize = (long) (encoderBitrate / 8 * videoDuration / 1000);
         }
     }
 
@@ -17700,7 +17725,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         return new ByteArrayInputStream(output, 0, outPos);
     }
 
-    private void processOpenVideo(final String videoPath, boolean muted, float start, float end, int compressQality) {
+    private void processOpenVideo(final String videoPath, boolean muted, float start, float end, final int compressQuality) {
         if (currentLoadingVideoRunnable != null) {
             Utilities.globalQueue.cancelRunnable(currentLoadingVideoRunnable);
             currentLoadingVideoRunnable = null;
@@ -17725,6 +17750,26 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
 
                 int[] params = new int[AnimatedFileDrawable.PARAM_NUM_COUNT];
                 AnimatedFileDrawable.getVideoInfo(videoPath, params);
+
+                final boolean hasAudio = params[AnimatedFileDrawable.PARAM_NUM_HAS_AUDIO] != 0;
+                videoConvertSupported = params[AnimatedFileDrawable.PARAM_NUM_SUPPORTED_VIDEO_CODEC] != 0 &&  (!hasAudio || params[AnimatedFileDrawable.PARAM_NUM_SUPPORTED_AUDIO_CODEC] != 0);
+                if (videoBitrate == -1) {
+                    originalBitrate = bitrate = params[AnimatedFileDrawable.PARAM_NUM_BITRATE];
+                } else {
+                    originalBitrate = bitrate = videoBitrate;
+                }
+                if(videoConvertSupported) {
+                    resultWidth = originalWidth = params[AnimatedFileDrawable.PARAM_NUM_WIDTH];
+                    resultHeight = originalHeight = params[AnimatedFileDrawable.PARAM_NUM_HEIGHT];
+                    updateCompressionsCount(originalWidth, originalHeight);
+                    if (compressQuality == -1) {
+                        selectedCompression = selectCompression();
+                    } else {
+                        selectedCompression = compressQuality;
+                    }
+                    prepareRealEncoderBitrate();
+                }
+
                 if (currentLoadingVideoRunnable != this) {
                     return;
                 }
@@ -17734,30 +17779,15 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         return;
                     }
                     currentLoadingVideoRunnable = null;
-                    boolean hasAudio = params[AnimatedFileDrawable.PARAM_NUM_HAS_AUDIO] != 0;
-                    videoConvertSupported = params[AnimatedFileDrawable.PARAM_NUM_SUPPORTED_VIDEO_CODEC] != 0 &&
-                            (!hasAudio || params[AnimatedFileDrawable.PARAM_NUM_SUPPORTED_AUDIO_CODEC] != 0);
                     audioFramesSize = params[AnimatedFileDrawable.PARAM_NUM_AUDIO_FRAME_SIZE];
                     videoDuration = params[AnimatedFileDrawable.PARAM_NUM_DURATION];
-                    if (videoBitrate == -1) {
-                        originalBitrate = bitrate = params[AnimatedFileDrawable.PARAM_NUM_BITRATE];
-                    } else {
-                        originalBitrate = bitrate = videoBitrate;
-                    }
+
                     videoFramerate = params[AnimatedFileDrawable.PARAM_NUM_FRAMERATE];
                     videoFramesSize = (long) (bitrate / 8 * videoDuration / 1000);
 
                     if (videoConvertSupported) {
                         rotationValue = params[AnimatedFileDrawable.PARAM_NUM_ROTATION];
-                        resultWidth = originalWidth = params[AnimatedFileDrawable.PARAM_NUM_WIDTH];
-                        resultHeight = originalHeight = params[AnimatedFileDrawable.PARAM_NUM_HEIGHT];
 
-                        updateCompressionsCount(originalWidth, originalHeight);
-                        if (compressQality == -1) {
-                            selectedCompression = selectCompression();
-                        } else {
-                            selectedCompression = compressQality;
-                        }
                         updateWidthHeightBitrateForCompression();
 
                         if (selectedCompression > compressionsCount - 1) {
