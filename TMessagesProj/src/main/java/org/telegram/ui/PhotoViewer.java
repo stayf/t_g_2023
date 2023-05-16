@@ -17405,6 +17405,26 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         }
     }
 
+    private void calculateEstimatedVideoSize(boolean needEncoding, boolean isMute) {
+        if (needEncoding) {
+            estimatedSize = (long) (((isMute ? 0 : audioFramesSize) + videoFramesSize) * ((float) estimatedDuration / videoDuration));
+            estimatedSize += estimatedSize / (32 * 1024) * 16;
+        } else {
+            estimatedSize = (long) (originalSize * ((float) estimatedDuration / videoDuration));
+            if (isMute)
+                estimatedSize -= (long) (audioFramesSize * ((float) estimatedDuration / videoDuration));
+        }
+    }
+
+    private boolean needEncoding() {
+        Object mediaEntities = editState.croppedPaintPath != null
+                ? (editState.croppedMediaEntities != null && !editState.croppedMediaEntities.isEmpty() ? editState.croppedMediaEntities : null)
+                : (editState.mediaEntities != null && !editState.mediaEntities.isEmpty() ? editState.mediaEntities : null);
+        Object paintPath = editState.croppedPaintPath != null ? editState.croppedPaintPath : editState.paintPath;
+        return !isH264Video || videoCutStart != 0 || rotationValue != 0 || resultWidth != originalWidth || resultHeight != originalHeight
+                || editState.cropState != null || mediaEntities != null || paintPath != null || editState.savedFilterState != null || sendPhotoType == SELECT_TYPE_AVATAR;
+    }
+
     private void updateVideoInfo() {
         if (actionBar == null) {
             return;
@@ -17430,13 +17450,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         int width;
         int height;
 
-        Object mediaEntities = editState.croppedPaintPath != null
-                ? (editState.croppedMediaEntities != null && !editState.croppedMediaEntities.isEmpty() ? editState.croppedMediaEntities : null)
-                : (editState.mediaEntities != null && !editState.mediaEntities.isEmpty() ? editState.mediaEntities : null);
-        Object paintPath = editState.croppedPaintPath != null ? editState.croppedPaintPath : editState.paintPath;
-        boolean needEncoding = !isH264Video || videoCutStart != 0 || rotationValue != 0 || resultWidth != originalWidth || resultHeight != originalHeight
-                || editState.cropState != null || mediaEntities != null || paintPath != null || editState.savedFilterState != null || sendPhotoType == SELECT_TYPE_AVATAR;
-
+        boolean needEncoding = needEncoding();
         if (muteVideo) {
             width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
             height = rotationValue == 90 || rotationValue == 270 ? resultWidth : resultHeight;
@@ -17457,21 +17471,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         } else if (compressItem.getTag() == null) {
             width = rotationValue == 90 || rotationValue == 270 ? originalHeight : originalWidth;
             height = rotationValue == 90 || rotationValue == 270 ? originalWidth : originalHeight;
-            if (needEncoding) {
-                estimatedSize = (long) ((audioFramesSize + videoFramesSize) * ((float) estimatedDuration / videoDuration));
-                estimatedSize += estimatedSize / (32 * 1024) * 16;
-            } else {
-                estimatedSize = (long) (originalSize * ((float) estimatedDuration / videoDuration));
-            }
+            calculateEstimatedVideoSize(needEncoding, false);
         } else {
             width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
             height = rotationValue == 90 || rotationValue == 270 ? resultWidth : resultHeight;
-            if (needEncoding) {
-                estimatedSize = (long) (((sendPhotoType == SELECT_TYPE_AVATAR ? 0 : audioFramesSize) + videoFramesSize) * ((float) estimatedDuration / videoDuration));
-                estimatedSize += estimatedSize / (32 * 1024) * 16;
-            } else {
-                estimatedSize = (long) (originalSize * ((float) estimatedDuration / videoDuration));
-            }
+            calculateEstimatedVideoSize(needEncoding, sendPhotoType == SELECT_TYPE_AVATAR);
         }
 
         if (videoCutStart == 0) {
