@@ -4960,6 +4960,20 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
         return -5;
     }
 
+    public static boolean isH264Video(String videoPath) {
+        MediaExtractor extractor = new MediaExtractor();
+        try {
+            extractor.setDataSource(videoPath);
+            int videoIndex = MediaController.findTrack(extractor, false);
+            return videoIndex >= 0 && extractor.getTrackFormat(videoIndex).getString(MediaFormat.KEY_MIME).equals(MediaController.VIDEO_MIME_TYPE);
+        } catch (Exception e) {
+            FileLog.e(e);
+        } finally {
+            extractor.release();
+        }
+        return false;
+    }
+
     private void didWriteData(final VideoConvertMessage message, final File file, final boolean last, final long lastFrameTimestamp, long availableSize, final boolean error, final float progress) {
         final boolean firstWrite = message.videoEditedInfo.videoConvertFirstWrite;
         if (firstWrite) {

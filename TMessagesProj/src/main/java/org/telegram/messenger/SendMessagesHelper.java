@@ -8221,6 +8221,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             return null;
         }
 
+        long originalSize = new File(videoPath).length();
         int originalBitrate = MediaController.getVideoBitrate(videoPath);
         if (originalBitrate == -1) {
             originalBitrate = params[AnimatedFileDrawable.PARAM_NUM_BITRATE];
@@ -8330,12 +8331,12 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             videoEditedInfo.resultWidth = videoEditedInfo.originalWidth;
             videoEditedInfo.resultHeight = videoEditedInfo.originalHeight;
             videoEditedInfo.bitrate = bitrate;
+            videoEditedInfo.estimatedSize = originalSize;
         } else {
             videoEditedInfo.bitrate = bitrate;
+            int encoderBitrate = MediaController.extractRealEncoderBitrate(videoEditedInfo.resultWidth, videoEditedInfo.resultHeight, bitrate);
+            videoEditedInfo.estimatedSize = (long) (audioFramesSize + videoDuration / 1000.0f * encoderBitrate / 8);
         }
-
-        int encoderBitrate = MediaController.extractRealEncoderBitrate(videoEditedInfo.resultWidth,  videoEditedInfo.resultHeight, bitrate);
-        videoEditedInfo.estimatedSize = (long) (audioFramesSize + videoDuration / 1000.0f * encoderBitrate / 8);
 
         if (videoEditedInfo.estimatedSize == 0) {
             videoEditedInfo.estimatedSize = 1;

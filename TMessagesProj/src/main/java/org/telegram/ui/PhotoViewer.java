@@ -10374,6 +10374,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                 updateActionBarTitlePadding();
                             }
                         }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            if(videoConvertSupported) updateVideoInfo();
+                        }
                     });
                     animatorSet.start();
                 }
@@ -17222,6 +17227,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     private float videoDuration;
     private int videoFramerate;
     private volatile boolean videoConvertSupported;
+    private volatile boolean isH264Video;
     private long startTime;
     private long endTime;
     private float videoCutStart;
@@ -17408,7 +17414,6 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             return;
         }
 
-        int compressIconWidth = 64;
         if (selectedCompression < 2) {
             compressItem.setImageResource(R.drawable.video_quality1);
         } else if (selectedCompression == 2) {
@@ -17419,9 +17424,18 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         itemsLayout.requestLayout();
 
         estimatedDuration = (long) Math.ceil((videoTimelineView.getRightProgress() - videoTimelineView.getLeftProgress()) * videoDuration);
+        videoCutStart = videoTimelineView.getLeftProgress();
+        videoCutEnd = videoTimelineView.getRightProgress();
 
         int width;
         int height;
+
+        Object mediaEntities = editState.croppedPaintPath != null
+                ? (editState.croppedMediaEntities != null && !editState.croppedMediaEntities.isEmpty() ? editState.croppedMediaEntities : null)
+                : (editState.mediaEntities != null && !editState.mediaEntities.isEmpty() ? editState.mediaEntities : null);
+        Object paintPath = editState.croppedPaintPath != null ? editState.croppedPaintPath : editState.paintPath;
+        boolean needEncoding = !isH264Video || videoCutStart != 0 || rotationValue != 0 || resultWidth != originalWidth || resultHeight != originalHeight
+                || editState.cropState != null || mediaEntities != null || paintPath != null || editState.savedFilterState != null || sendPhotoType == SELECT_TYPE_AVATAR;
 
         if (muteVideo) {
             width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
@@ -17443,17 +17457,23 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         } else if (compressItem.getTag() == null) {
             width = rotationValue == 90 || rotationValue == 270 ? originalHeight : originalWidth;
             height = rotationValue == 90 || rotationValue == 270 ? originalWidth : originalHeight;
-            estimatedSize = (long) (originalSize * ((float) estimatedDuration / videoDuration));
+            if (needEncoding) {
+                estimatedSize = (long) ((audioFramesSize + videoFramesSize) * ((float) estimatedDuration / videoDuration));
+                estimatedSize += estimatedSize / (32 * 1024) * 16;
+            } else {
+                estimatedSize = (long) (originalSize * ((float) estimatedDuration / videoDuration));
+            }
         } else {
             width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
             height = rotationValue == 90 || rotationValue == 270 ? resultWidth : resultHeight;
-
-            estimatedSize = (long) (((sendPhotoType == SELECT_TYPE_AVATAR ? 0 : audioFramesSize) + videoFramesSize) * ((float) estimatedDuration / videoDuration));
-            estimatedSize += estimatedSize / (32 * 1024) * 16;
+            if (needEncoding) {
+                estimatedSize = (long) (((sendPhotoType == SELECT_TYPE_AVATAR ? 0 : audioFramesSize) + videoFramesSize) * ((float) estimatedDuration / videoDuration));
+                estimatedSize += estimatedSize / (32 * 1024) * 16;
+            } else {
+                estimatedSize = (long) (originalSize * ((float) estimatedDuration / videoDuration));
+            }
         }
 
-        videoCutStart = videoTimelineView.getLeftProgress();
-        videoCutEnd = videoTimelineView.getRightProgress();
         if (videoCutStart == 0) {
             startTime = -1;
         } else {
@@ -17758,7 +17778,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 } else {
                     originalBitrate = bitrate = videoBitrate;
                 }
-                if(videoConvertSupported) {
+                if (videoConvertSupported) {
                     resultWidth = originalWidth = params[AnimatedFileDrawable.PARAM_NUM_WIDTH];
                     resultHeight = originalHeight = params[AnimatedFileDrawable.PARAM_NUM_HEIGHT];
                     updateCompressionsCount(originalWidth, originalHeight);
@@ -17768,6 +17788,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         selectedCompression = compressQuality;
                     }
                     prepareRealEncoderBitrate();
+                    isH264Video = MediaController.isH264Video(videoPath);
                 }
 
                 if (currentLoadingVideoRunnable != this) {
