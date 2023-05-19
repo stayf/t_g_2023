@@ -17572,6 +17572,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private Size calculateResultVideoSize() {
+        if (compressionsCount == 1) {
+            return new Size(originalWidth, originalHeight);
+        }
         float maxSize;
         int resultWidth;
         int resultHeight;
@@ -17822,10 +17825,6 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                         setCompressItemEnabled(compressionsCount > 1, true);
                         if (BuildVars.LOGS_ENABLED) {
                             FileLog.d("compressionsCount = " + compressionsCount + " w = " + originalWidth + " h = " + originalHeight + " r = " + rotationValue);
-                        }
-                        if (Build.VERSION.SDK_INT < 18 && compressItem.getTag() != null) {
-                            videoConvertSupported = false;
-                            setCompressItemEnabled(false, true);
                         }
                         qualityChooseView.invalidate();
                     } else {
