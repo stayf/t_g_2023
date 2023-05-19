@@ -17447,13 +17447,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         videoCutStart = videoTimelineView.getLeftProgress();
         videoCutEnd = videoTimelineView.getRightProgress();
 
-        int width;
-        int height;
+        int width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
+        int height = rotationValue == 90 || rotationValue == 270 ? resultWidth : resultHeight;
 
         boolean needEncoding = needEncoding();
         if (muteVideo) {
-            width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
-            height = rotationValue == 90 || rotationValue == 270 ? resultWidth : resultHeight;
             int bitrate;
             if (sendPhotoType == SELECT_TYPE_AVATAR) {
                 if (estimatedDuration <= 2000) {
@@ -17468,13 +17466,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             estimatedSize = (long) (bitrate / 8 * (estimatedDuration / 1000.0f));
             estimatedSize += estimatedSize / (32 * 1024) * 16;
-        } else if (compressItem.getTag() == null) {
-            width = rotationValue == 90 || rotationValue == 270 ? originalHeight : originalWidth;
-            height = rotationValue == 90 || rotationValue == 270 ? originalWidth : originalHeight;
-            calculateEstimatedVideoSize(needEncoding, false);
         } else {
-            width = rotationValue == 90 || rotationValue == 270 ? resultHeight : resultWidth;
-            height = rotationValue == 90 || rotationValue == 270 ? resultWidth : resultHeight;
             calculateEstimatedVideoSize(needEncoding, sendPhotoType == SELECT_TYPE_AVATAR);
         }
 
@@ -17774,26 +17766,18 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     return;
                 }
                 int videoBitrate = MediaController.getVideoBitrate(videoPath);
-
                 int[] params = new int[AnimatedFileDrawable.PARAM_NUM_COUNT];
                 AnimatedFileDrawable.getVideoInfo(videoPath, params);
 
                 final boolean hasAudio = params[AnimatedFileDrawable.PARAM_NUM_HAS_AUDIO] != 0;
                 videoConvertSupported = params[AnimatedFileDrawable.PARAM_NUM_SUPPORTED_VIDEO_CODEC] != 0 &&  (!hasAudio || params[AnimatedFileDrawable.PARAM_NUM_SUPPORTED_AUDIO_CODEC] != 0);
-                if (videoBitrate == -1) {
-                    originalBitrate = bitrate = params[AnimatedFileDrawable.PARAM_NUM_BITRATE];
-                } else {
-                    originalBitrate = bitrate = videoBitrate;
-                }
+                originalBitrate = bitrate = videoBitrate == -1 ? params[AnimatedFileDrawable.PARAM_NUM_BITRATE] : videoBitrate;
+
                 if (videoConvertSupported) {
                     resultWidth = originalWidth = params[AnimatedFileDrawable.PARAM_NUM_WIDTH];
                     resultHeight = originalHeight = params[AnimatedFileDrawable.PARAM_NUM_HEIGHT];
                     updateCompressionsCount(originalWidth, originalHeight);
-                    if (compressQuality == -1) {
-                        selectedCompression = selectCompression();
-                    } else {
-                        selectedCompression = compressQuality;
-                    }
+                    selectedCompression = compressQuality == -1 ? selectCompression() : compressQuality;
                     prepareRealEncoderBitrate();
                     isH264Video = MediaController.isH264Video(videoPath);
                 }
@@ -17809,13 +17793,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     currentLoadingVideoRunnable = null;
                     audioFramesSize = params[AnimatedFileDrawable.PARAM_NUM_AUDIO_FRAME_SIZE];
                     videoDuration = params[AnimatedFileDrawable.PARAM_NUM_DURATION];
-
                     videoFramerate = params[AnimatedFileDrawable.PARAM_NUM_FRAMERATE];
                     videoFramesSize = (long) (bitrate / 8 * videoDuration / 1000);
 
                     if (videoConvertSupported) {
                         rotationValue = params[AnimatedFileDrawable.PARAM_NUM_ROTATION];
-
                         updateWidthHeightBitrateForCompression();
 
                         if (selectedCompression > compressionsCount - 1) {
