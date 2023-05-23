@@ -4184,7 +4184,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         int wasOutlineAlpha = skeletonOutlinePaint.getAlpha();
                         skeletonServicePaint.setAlpha((int) (0xFF * topSkeletonAlpha));
                         skeletonPaint.setAlpha((int) (topSkeletonAlpha * alpha));
-                        skeletonOutlinePaint.setAlpha((int) (wasOutlineAlpha * alpha));
+                        skeletonOutlinePaint.setAlpha((int) (topSkeletonAlpha * alpha));
                         while (lastTop > blurredViewTopOffset) {
                             lastTop -= AndroidUtilities.dp(3f);
 

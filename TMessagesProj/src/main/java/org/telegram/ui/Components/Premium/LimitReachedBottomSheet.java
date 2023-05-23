@@ -253,7 +253,7 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
         }
         for (Object obj : selectedChats) {
             TLRPC.User user = (TLRPC.User) obj;
-            SendMessagesHelper.getInstance(currentAccount).sendMessage(link, user.id, null, null, linkPreview, false, null, null, null, false, 0, null, false);
+            SendMessagesHelper.getInstance(currentAccount).sendMessage(link, user.id, null, null, null, true, null, null, null, false, 0, null, false);
         }
         AndroidUtilities.runOnUIThread(() -> {
             BulletinFactory factory = BulletinFactory.global();
@@ -520,25 +520,7 @@ public class LimitReachedBottomSheet extends BottomSheetWithRecyclerListView {
         }
         updateRows();
         updateButton();
-
-        TLRPC.ChatFull chatFull = MessagesController.getInstance(currentAccount).getChatFull(fromChat.id);
-        String link;
-        if (fromChat.username == null && chatFull != null && chatFull.exported_invite != null) {
-            link = chatFull.exported_invite.link;
-
-            TLRPC.TL_messages_getWebPage webPagePreview = new TLRPC.TL_messages_getWebPage();
-            webPagePreview.url = link;
-            ConnectionsManager.getInstance(currentAccount).sendRequest(webPagePreview,(response, error) -> AndroidUtilities.runOnUIThread(() -> {
-                if (response != null) {
-                    if (response instanceof TLRPC.TL_webPage) {
-                        linkPreview = (TLRPC.TL_webPage) response;
-                    }
-                }
-            }));
-        }
-
     }
-
 
     private class HeaderView extends LinearLayout {
 
