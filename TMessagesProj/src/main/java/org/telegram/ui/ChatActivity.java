@@ -6721,7 +6721,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         bottomOverlayStartButton.setOnClickListener(v -> bottomOverlayChatText.callOnClick());
         bottomOverlayChat.addView(bottomOverlayStartButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER, 8, 8, 8, 8));
 
-        if (currentUser != null && currentUser.bot && !UserObject.isReplyUser(currentUser) && !isInScheduleMode()) {
+        if (currentUser != null && currentUser.bot && !UserObject.isReplyUser(currentUser) && !isInScheduleMode() && chatMode != MODE_PINNED) {
             bottomOverlayStartButton.setVisibility(View.VISIBLE);
             bottomOverlayChat.setVisibility(View.VISIBLE);
         }
