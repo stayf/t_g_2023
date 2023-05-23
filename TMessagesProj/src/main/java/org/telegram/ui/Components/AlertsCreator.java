@@ -1700,7 +1700,7 @@ public class AlertsCreator {
 
         if (user != null && user.bot) {
             cell[0] = new CheckBoxCell(context, 1, resourcesProvider);
-            cell[0].setBackground(Theme.getSelectorDrawable(false));
+            cell[0].setBackgroundDrawable(Theme.getSelectorDrawable(false));
             cell[0].setText(LocaleController.getString(R.string.BlockBot), "", false, false);
             cell[0].setPadding(LocaleController.isRTL ? AndroidUtilities.dp(16) : AndroidUtilities.dp(8), 0, LocaleController.isRTL ? AndroidUtilities.dp(8) : AndroidUtilities.dp(16), 0);
             cell[0].setChecked(deleteForAll[0] = true, false);
@@ -1712,8 +1712,7 @@ public class AlertsCreator {
             });
         } else if (!second && (secret && !clear || canDeleteInbox) && !UserObject.isDeleted(user) && !lastMessageIsJoined || (deleteChatForAll = checkDeleteForAll && !clear && chat != null && chat.creator)) {
             cell[0] = new CheckBoxCell(context, 1, resourcesProvider);
-            cell[0].setBackground(Theme.getSelectorDrawable(false));
-            cell[0].setMultiline(true);
+            cell[0].setBackgroundDrawable(Theme.getSelectorDrawable(false));
             if (deleteChatForAll) {
                 if (ChatObject.isChannel(chat) && !chat.megagroup) {
                     cell[0].setText(LocaleController.getString("DeleteChannelForAll", R.string.DeleteChannelForAll), "", false, false);
@@ -1965,8 +1964,7 @@ public class AlertsCreator {
         }
         if ((user != null && user.id != selfUserId) || (chat != null && canDeleteHistory && !ChatObject.isPublic(chat) && !ChatObject.isChannelAndNotMegaGroup(chat))) {
             cell[0] = new CheckBoxCell(context, 1, resourcesProvider);
-            cell[0].setBackground(Theme.getSelectorDrawable(false));
-            cell[0].setMultiline(true);
+            cell[0].setBackgroundDrawable(Theme.getSelectorDrawable(false));
             if (chat != null) {
                 cell[0].setText(LocaleController.getString("DeleteMessagesOptionAlsoChat", R.string.DeleteMessagesOptionAlsoChat), "", false, false);
             } else {
@@ -5574,8 +5572,7 @@ public class AlertsCreator {
                 hasDeleteForAllCheck = true;
                 FrameLayout frameLayout = new FrameLayout(activity);
                 CheckBoxCell cell = new CheckBoxCell(activity, 1, resourcesProvider);
-                cell.setBackground(Theme.getSelectorDrawable(false));
-                cell.setMultiline(true);
+                cell.setBackgroundDrawable(Theme.getSelectorDrawable(false));
                 if (canDeleteInbox) {
                     cell.setText(LocaleController.formatString("DeleteMessagesOptionAlso", R.string.DeleteMessagesOptionAlso, UserObject.getFirstName(user)), "", false, false);
                 } else if (chat != null && (hasNotOut || myMessagesCount == count)) {
